@@ -1,3 +1,19 @@
+
+
+// Extract info from the selected file to process its contents
+function handleSelectedFile(evt) {
+  let file = evt.target.files[0];
+  let fileReader = new FileReader();
+
+  fileReader.onload = function(event) {
+      let contents = event.target.result;
+      parseCSV(contents);
+  };
+
+  fileReader.readAsText(file);
+}
+
+// Implementation of CSV parsing
 function parseCSV(csv) {
     let rows = csv.split('\n');
   
@@ -5,13 +21,12 @@ function parseCSV(csv) {
       throw new Error('CSV data is empty or incomplete.');
     }
   
-    // Headers and columns
     let header = rows[0].split(',');
     let columns = header.map(column => column.trim()+ "");
   
     csvData = [];
 
-    for (let i = 1; i < rows.length; i++) { // start from 1 to skip header
+    for (let i = 1; i < rows.length; i++) { // start from 1 to skip header names
       const row = rows[i].split(',');
   
 
@@ -21,15 +36,14 @@ function parseCSV(csv) {
       while (row.length < columns.length) {
       row.push('');
       }
-  
-      // Info in cells
+ 
+      // CHANGE TO SEPARATE CELLS (??)
       const rowData = {};
   
       for (let j = 0; j < columns.length; j++) {
         rowData[columns[j]] = row[j].trim();
       }
   
-      // Add rowData into the csvData array (each row is one vote)
       csvData.push(rowData);
     }
   
