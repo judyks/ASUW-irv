@@ -27,13 +27,9 @@
           reader.onload = function (e) {
             const csvData = e.target.result;
             const parsedData = parseCSV(csvData);
-
-            // The parsed CSV data is available in the 'parsedData' array
             console.log(parsedData);
-
-            // Dynamically generate a filename based on the current date and time
+            window.parsedData = parsedData;
             const fileName = generateFileName();
-            // You can use 'fileName' to save or handle the parsed data with this filename
             console.log("Generated Filename:", fileName);
           };
 
@@ -41,7 +37,6 @@
         }
       }
 
-      // Implementation of CSV parsing
       function parseCSV(csv) {
         let rows = csv.split("\n");
 
@@ -55,6 +50,8 @@
         csvData = [];
 
         for (let i = 1; i < rows.length; i++) {
+          if(rows[i].length == 0) continue;
+
           // start from 1 to skip header names
           const row = rows[i].split(",");
 
@@ -76,6 +73,10 @@
         }
 
         return csvData;
+      }
+
+      function generateFileName() {
+        return new Date().toISOString().replace(/:/g, "-");
       }
     </script>
   </body>
