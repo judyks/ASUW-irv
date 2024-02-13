@@ -7,6 +7,8 @@
       ASUW IRV (Instant-Runoff Voting) Software for Student Government Elections
     </title>
 
+    
+    <script src="csvToArray.v2.1.js"></script>
     <script>
       // INTERFACE
     </script>
@@ -25,59 +27,15 @@
           const reader = new FileReader();
 
           reader.onload = function (e) {
-            const csvData = e.target.result;
-            const parsedData = parseCSV(csvData);
-            console.log(parsedData);
-            window.parsedData = parsedData;
-            const fileName = generateFileName();
-            console.log("Generated Filename:", fileName);
+            const csvString = e.target.result;
+            window.csvData = csvString.csvToArray();
+            console.log(csvData);
           };
 
           reader.readAsText(file);
         }
       }
 
-      function parseCSV(csv) {
-        let rows = csv.split("\n");
-
-        if (rows.length < 2) {
-          throw new Error("CSV data is empty or incomplete.");
-        }
-
-        let header = rows[0].split(",");
-        let columns = header.map((column) => column.trim() + "");
-
-        csvData = [];
-
-        for (let i = 1; i < rows.length; i++) {
-          if(rows[i].length == 0) continue;
-
-          // start from 1 to skip header names
-          const row = rows[i].split(",");
-
-          // fill missing columns with empty string
-          // (unanswered or empty optional questions)
-          // TODO: Would it be better to throw error??
-          while (row.length < columns.length) {
-            row.push("");
-          }
-
-          // This is equal to the info in individual cells
-          const rowData = {};
-
-          for (let j = 0; j < columns.length; j++) {
-            rowData[columns[j]] = row[j].trim();
-          }
-
-          csvData.push(rowData);
-        }
-
-        return csvData;
-      }
-
-      function generateFileName() {
-        return new Date().toISOString().replace(/:/g, "-");
-      }
     </script>
   </body>
 </html>
