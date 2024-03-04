@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IRV ASUW Elections</title>
+    <!-- will move to style.css soon -->
     <style>
-      /* will move to style.css soon */
       @font-face {
         font-family: "Encode Sans";
         src: url("Encode Sans Normal/encode-sans.ttf") format("ttf");
@@ -23,18 +23,15 @@
       th {
         background-color: #f2f2f2;
       }
-
       body {
         background-color: #fbf9f9;
         margin: 0;
         padding: 40px;
         font: "Encode Sans";
       }
-
       .title {
         text-align: center;
       }
-
       h2 {
         text-align: center;
         font-size: large;
@@ -47,13 +44,11 @@
         padding: 10px;
         width: 50%;
       }
-
       h3 {
         font-size: large;
         color: #4b2e83;
         padding-top: 10px;
       }
-
       #positionDropdown {
         padding: 8px;
         border-radius: 4px;
@@ -73,8 +68,12 @@
         <input type="file" id="fileInput" accept=".csv" />
         <button id="processButton" disabled>Process IRV</button>
         <select id="positionDropdown" style="display: none"></select>
+        <button id="resultsByRoundButton" style="display: none">
+          Results by Round
+        </button>
         <section id="winnersOverview"></section>
         <div id="output"></div>
+        <div id="roundResultsContainer" style="display: none"></div>
       </section>
     </main>
 

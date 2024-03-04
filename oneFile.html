@@ -22,18 +22,15 @@
       th {
         background-color: #f2f2f2;
       }
-
       body {
         background-color: #fbf9f9;
         margin: 0;
         padding: 40px;
         font: "Encode Sans";
       }
-
       .title {
         text-align: center;
       }
-
       h2 {
         text-align: center;
         font-size: large;
@@ -46,13 +43,11 @@
         padding: 10px;
         width: 50%;
       }
-
       h3 {
         font-size: large;
         color: #4b2e83;
         padding-top: 10px;
       }
-
       #positionDropdown {
         padding: 8px;
         border-radius: 4px;
@@ -72,8 +67,12 @@
         <input type="file" id="fileInput" accept=".csv" />
         <button id="processButton" disabled>Process IRV</button>
         <select id="positionDropdown" style="display: none"></select>
+        <button id="resultsByRoundButton" style="display: none">
+          Results by Round
+        </button>
         <section id="winnersOverview"></section>
         <div id="output"></div>
+        <div id="roundResultsContainer" style="display: none"></div>
       </section>
     </main>
 
@@ -81,35 +80,62 @@
       let globalCsvData = null;
       let winners = {};
 
-      document.addEventListener("DOMContentLoaded", function () {
+      document.addEventListener("DOMContentLoaded", () => {
         const fileInput = document.getElementById("fileInput");
         const processButton = document.getElementById("processButton");
-        const positionDropdown = document.getElementById("positionDropdown");
+        const resultsByRoundButton = document.getElementById(
+          "resultsByRoundButton"
+        );
 
         fileInput.addEventListener("change", handleFileSelect);
-        processButton.addEventListener("click", () => {
-          if (globalCsvData) {
-            processData(globalCsvData);
-          }
-        });
-        positionDropdown.addEventListener("change", () => {
-          if (positionDropdown.value) {
-            location.hash = `#${positionDropdown.value}`;
-          }
-        });
+        processButton.addEventListener("click", processButtonClick);
+        document
+          .getElementById("positionDropdown")
+          .addEventListener("change", updateLocationHash);
+        resultsByRoundButton.addEventListener("click", toggleResultsDisplay);
       });
 
       function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
 
-        reader.onload = function (e) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
           globalCsvData = e.target.result;
           document.getElementById("processButton").disabled = false;
         };
-
         reader.readAsText(file);
+      }
+
+      function processButtonClick() {
+        if (globalCsvData) {
+          processData(globalCsvData);
+        }
+      }
+
+      function updateLocationHash() {
+        const positionDropdown = document.getElementById("positionDropdown");
+        if (positionDropdown.value) {
+          location.hash = `#${positionDropdown.value}`;
+        }
+      }
+
+      function toggleResultsDisplay() {
+        const roundResultsContainer = document.getElementById(
+          "roundResultsContainer"
+        );
+        const outputContainer = document.getElementById("output");
+        const positionDropdown = document.getElementById("positionDropdown");
+        const winnersOverview = document.getElementById("winnersOverview");
+        const isHidden = roundResultsContainer.style.display === "none";
+
+        roundResultsContainer.style.display = isHidden ? "block" : "none";
+        outputContainer.style.display = isHidden ? "none" : "block";
+        positionDropdown.style.display = isHidden ? "none" : "block";
+        winnersOverview.style.display = isHidden ? "none" : "block";
+        document.getElementById("resultsByRoundButton").textContent = isHidden
+          ? "Results by position"
+          : "Results by Round";
       }
 
       function processData(csvData) {
@@ -118,30 +144,49 @@
         const positions = headers.map((header) =>
           header.split("presidential")[0].trim()
         );
-        let output = "";
         let uniquePositions = [...new Set(positions)];
 
-        document.getElementById("positionDropdown").style.display = "block";
-        document.getElementById("positionDropdown").innerHTML =
+        initializePositionDropdown(uniquePositions);
+        processPositions(positions, lines, uniquePositions);
+      }
+
+      function initializePositionDropdown(uniquePositions) {
+        const positionDropdown = document.getElementById("positionDropdown");
+        positionDropdown.style.display = "block";
+        positionDropdown.innerHTML =
           '<option value="">Select position</option>' +
           uniquePositions
             .map(
               (position) => `<option value="${position}">${position}</option>`
             )
             .join("");
+      }
+
+      function processPositions(positions, lines, uniquePositions) {
+        let output = "Results by Position";
+        let roundResults = {};
 
         uniquePositions.forEach((position) => {
-          const allowedPosition = isAllowedPosition(position);
-          if (!allowedPosition) return;
+          if (!isAllowedPosition(position)) return;
 
-          output += `<div id="${position}">${createPositionOutput(
+          const { positionOutput, positionRoundResults } = createPositionOutput(
             position,
             lines
-          )}</div>`;
+          );
+          output += `<div id="${position}">${positionOutput}</div>`;
+
+          positionRoundResults.forEach((roundResult, roundIndex) => {
+            roundResults[roundIndex] = roundResults[roundIndex] || [];
+            roundResults[roundIndex].push(
+              `<h4>Position: ${position}</h4>${roundResult}`
+            );
+          });
         });
 
         document.getElementById("output").innerHTML = output;
         updateWinnersOverview();
+        document.getElementById("resultsByRoundButton").style.display = "block";
+        displayRoundResults(roundResults);
       }
 
       function isAllowedPosition(position) {
@@ -155,10 +200,8 @@
           "Director of Programming",
           "Director of Campus Partnerships",
         ];
-        return (
-          allowedHeaders.find((header) =>
-            position.toLowerCase().startsWith(header.toLowerCase())
-          ) || null
+        return allowedHeaders.some((header) =>
+          position.toLowerCase().startsWith(header.toLowerCase())
         );
       }
 
@@ -167,8 +210,10 @@
         let positionVotes = getPositionVotes(position, lines);
         let round = 1;
         let eliminatedCandidates = new Set();
+        let positionRoundResults = [];
+        let winnerDeclared = false;
 
-        while (true) {
+        while (!winnerDeclared) {
           let { voteCounts, totalVotes } = countVotes(
             positionVotes,
             eliminatedCandidates
@@ -186,29 +231,30 @@
               totalVotes
             );
 
-          output += generateRoundOutput(
+          let roundOutput = generateRoundOutput(
             round,
             sortedVotes,
             totalVotes,
             eliminatedThisRound,
             eliminatedCandidates
           );
+          output += roundOutput;
+          positionRoundResults.push(roundOutput);
 
-          if (isTie) {
-            output += `<h4>There is a tie. Ties are resolved using a process that is determined by the ASUW Elections Administration Committee.</h4>`;
-            break;
-          }
-
-          if (sortedVotes[0][1] > totalVotes / 2 || sortedVotes.length === 1) {
+          if (
+            isTie ||
+            sortedVotes[0][1] > totalVotes / 2 ||
+            sortedVotes.length === 1
+          ) {
             output += declareWinner(sortedVotes, totalVotes, position);
-            break;
+            winnerDeclared = true;
           } else {
             eliminatedCandidates = newEliminatedCandidates;
             round++;
           }
         }
 
-        return output;
+        return { positionOutput: output, positionRoundResults };
       }
 
       function getPositionVotes(position, lines) {
@@ -263,14 +309,12 @@
         });
 
         output += `</table>`;
-
-        if (eliminatedThisRound && eliminatedThisRound.length > 0) {
+        if (eliminatedThisRound.length > 0) {
           output += `<p>Eliminated this round: ${eliminatedThisRound.join(
             ", "
           )}</p>`;
         }
-
-        if (allEliminatedCandidates && allEliminatedCandidates.size > 0) {
+        if (allEliminatedCandidates.size > 0) {
           output += `<p>Eliminated candidates so far: ${Array.from(
             allEliminatedCandidates
           ).join(", ")}</p>`;
@@ -301,7 +345,6 @@
         let candidatesForElimination = sortedVotes
           .filter(([_, votes]) => votes === minVotes)
           .map(([candidate]) => candidate);
-
         let isTie =
           sortedVotes.length === 2 && sortedVotes[0][1] === sortedVotes[1][1];
 
@@ -318,6 +361,7 @@
         };
       }
 
+      // currently overview only shows positions with winners (doesn't show results for positions with ties)
       function updateWinnersOverview() {
         let overviewHtml = "<h3>Overview</h3><table>";
         overviewHtml +=
@@ -329,6 +373,17 @@
 
         overviewHtml += "</table>";
         document.getElementById("winnersOverview").innerHTML = overviewHtml;
+      }
+
+      function displayRoundResults(roundResults) {
+        let roundResultsOutput = "<h1>Results by round</h1>";
+        Object.keys(roundResults).forEach((round) => {
+          roundResultsOutput +=
+            `<h2>Round ${parseInt(round) + 1}</h2>` +
+            roundResults[round].join("");
+        });
+        document.getElementById("roundResultsContainer").innerHTML =
+          roundResultsOutput;
       }
     </script>
   </body>
