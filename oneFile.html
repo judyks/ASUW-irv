@@ -56,6 +56,60 @@
         margin-top: 20px;
         margin-bottom: 30px;
       }
+      .drop-zone {
+        border: 2px dashed #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+      .drop-zone:hover,
+      .drop-zone.dragover {
+        background-color: #f8f8f8;
+      }
+      .drop-zone {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+      #fileName {
+        font-weight: bold;
+      }
+      button {
+        background-color: rgba(51, 51, 51, 0.05);
+        border-radius: 8px;
+        border-width: 0;
+        color: #333333;
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Encode sans";
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        list-style: none;
+        margin: 0;
+        padding: 10px 12px;
+        text-align: center;
+        font-weight: bold;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: rgba(175, 174, 174, 0.543);
+      }
+      select {
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px 0;
+      }
+      section {
+        margin-bottom: 20px;
+      }
+      #output {
+        margin-top: 20px;
+      }
     </style>
   </head>
   <body>
@@ -64,7 +118,16 @@
     </header>
     <main>
       <section>
-        <input type="file" id="fileInput" accept=".csv" />
+        <div id="dropZone" class="drop-zone">
+          Drag and drop a file here or click to select a file.
+          <br /><span id="fileName"><b>No file selected</b></span>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".csv"
+            style="display: none"
+          />
+        </div>
         <button id="processButton" disabled>Process IRV</button>
         <select id="positionDropdown" style="display: none"></select>
         <button id="resultsByRoundButton" style="display: none">
@@ -86,13 +149,51 @@
         const resultsByRoundButton = document.getElementById(
           "resultsByRoundButton"
         );
+        const dropZone = document.getElementById("dropZone");
+        const fileNameElement = document.getElementById("fileName");
 
-        fileInput.addEventListener("change", handleFileSelect);
+        fileInput.addEventListener("change", function (event) {
+          handleFileSelect(event);
+          if (fileInput.files.length > 0) {
+            fileNameElement.innerHTML =
+              "<b>" + fileInput.files[0].name + "</b>";
+          } else {
+            fileNameElement.innerHTML = "<b>No file selected</b>";
+          }
+        });
+
         processButton.addEventListener("click", processButtonClick);
         document
           .getElementById("positionDropdown")
           .addEventListener("change", updateLocationHash);
         resultsByRoundButton.addEventListener("click", toggleResultsDisplay);
+
+        dropZone.addEventListener("click", () => fileInput.click());
+
+        dropZone.addEventListener("dragover", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.remove("dragover");
+
+          const files = event.dataTransfer.files;
+          if (files.length) {
+            fileInput.files = files;
+            fileNameElement.textContent = files[0].name;
+            handleFileSelect({ target: { files } });
+          }
+        });
       });
 
       function handleFileSelect(event) {
@@ -190,7 +291,7 @@
       }
 
       function isAllowedPosition(position) {
-        const allowedHeaders = [
+        const positionName = [
           "President",
           "Vice President",
           "Director of University Affairs",
@@ -200,7 +301,7 @@
           "Director of Programming",
           "Director of Campus Partnerships",
         ];
-        return allowedHeaders.some((header) =>
+        return positionName.some((header) =>
           position.toLowerCase().startsWith(header.toLowerCase())
         );
       }
