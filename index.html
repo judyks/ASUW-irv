@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IRV ASUW Elections</title>
     <style>
+      @font-face {
+        font-family: "Encode Sans";
+        src: url("Encode Sans Normal/encode-sans.ttf") format("ttf");
+      }
       table {
         border-collapse: collapse;
-        width: 100%;
+        width: 50%;
       }
       th,
       td {
@@ -18,23 +22,80 @@
       th {
         background-color: #f2f2f2;
       }
+
+      body {
+        background-color: #fbf9f9;
+        margin: 0;
+        padding: 40px;
+        font-family: "Encode Sans";
+      }
+
+      .title {
+        text-align: center;
+      }
+
+      h2 {
+        text-align: center;
+        font-size: large;
+        margin-top: 50px;
+        margin-bottom: 20px;
+        background-color: #4b2e83;
+        color: #fffcfc;
+        border: solid 0.5px #4b2e83;
+        border-radius: 20px;
+        padding: 10px;
+        width: 50%;
+      }
+
+      h3 {
+        font-size: medium;
+        color: #4b2e83;
+        padding-top: 10px;
+      }
+
+      #positionDropdown {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #cccccc;
+        background-color: #ffffff;
+        margin-top: 20px;
+        margin-bottom: 30px;
+      }
     </style>
   </head>
   <body>
     <header>
-      <h1>IRV ASUW Elections</h1>
+      <h1 class="title">IRV ASUW Elections</h1>
     </header>
     <main>
       <section>
         <input type="file" id="fileInput" accept=".csv" />
+        <button id="processButton" disabled>Process IRV</button>
+        <select id="positionDropdown" style="display: none"></select>
+        <!-- Dropdown for positions -->
         <div id="output"></div>
       </section>
     </main>
 
     <script>
+      let globalCsvData = null;
+
       document.addEventListener("DOMContentLoaded", function () {
         const fileInput = document.getElementById("fileInput");
+        const processButton = document.getElementById("processButton");
+        const positionDropdown = document.getElementById("positionDropdown");
+
         fileInput.addEventListener("change", handleFileSelect);
+        processButton.addEventListener("click", () => {
+          if (globalCsvData) {
+            processData(globalCsvData);
+          }
+        });
+        positionDropdown.addEventListener("change", () => {
+          if (positionDropdown.value) {
+            location.hash = `#${positionDropdown.value}`;
+          }
+        });
       });
 
       function handleFileSelect(event) {
@@ -43,8 +104,8 @@
         const reader = new FileReader();
 
         reader.onload = function (e) {
-          const contents = e.target.result;
-          processData(contents);
+          globalCsvData = e.target.result;
+          document.getElementById("processButton").disabled = false;
         };
 
         reader.readAsText(file);
@@ -59,18 +120,29 @@
         let output = "";
         let uniquePositions = [...new Set(positions)];
 
+        document.getElementById("positionDropdown").style.display = "block";
+        document.getElementById("positionDropdown").innerHTML =
+          '<option value="">Select position</option>' +
+          uniquePositions
+            .map((position) => {
+              return `<option value="${position}">${position}</option>`;
+            })
+            .join("");
+
         uniquePositions.forEach((position) => {
           const allowedPosition = isAllowedPosition(position);
           if (!allowedPosition) return;
 
-          output += createPositionOutput(position, lines);
+          output += `<div id="${position}">${createPositionOutput(
+            position,
+            lines
+          )}</div>`;
         });
 
         document.getElementById("output").innerHTML = output;
       }
-
       function createPositionOutput(position, lines) {
-        let output = `<h2>Position: ${position}</h2>`;
+        let output = `<h2>${position}</h2>`;
         let positionVotes = getPositionVotes(position, lines);
         let round = 1;
         let eliminatedCandidates = new Set();
@@ -114,7 +186,7 @@
             round++;
           }
         }
-        output += `<hr>`; // Add a horizontal line after each position's details
+
         return output;
       }
 
@@ -126,6 +198,7 @@
           "Director of Internal Policy",
           "Director of Community Relations",
           "Director of Diversity Efforts",
+          "Director of Programming",
           "Director of Campus Partnerships",
         ];
         return (
