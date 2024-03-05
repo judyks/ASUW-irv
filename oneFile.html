@@ -9,135 +9,194 @@
         font-family: "Encode Sans";
         src: url("Encode Sans Normal/encode-sans.ttf") format("ttf");
       }
-      table {
-        border-collapse: collapse;
-        width: 50%;
-      }
-      th,
-      td {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
       body {
-        background-color: #fbf9f9;
+        background-color: #f4f7fa;
         margin: 0;
         padding: 40px;
-        font: "Encode Sans";
+        font-family: "Encode Sans", sans-serif;
+        color: #333;
       }
       .title {
         text-align: center;
+        font-size: 2.5em;
+        color: #333;
+        margin-bottom: 0.5em;
+      }
+      table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: 30px auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        text-align: left;
+        padding: 12px;
+        font-size: 14px;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      th {
+        background-color: #4b2e83;
+        color: white;
       }
       h2 {
         text-align: center;
-        font-size: large;
-        margin-top: 50px;
-        margin-bottom: 20px;
-        background-color: #4b2e83;
-        color: #fffcfc;
-        border: solid 0.5px #4b2e83;
-        border-radius: 20px;
-        padding: 10px;
-        width: 50%;
+        font-size: 1.2em;
+        color: #333;
+        margin: 20px 0;
       }
       h3 {
-        font-size: large;
-        color: #4b2e83;
-        padding-top: 10px;
+        font-size: 1em;
+        color: #333;
+        margin-top: 20px;
       }
-      #positionDropdown {
-        padding: 8px;
+      #positionDropdown,
+      select {
+        padding: 10px;
         border-radius: 4px;
         border: 1px solid #cccccc;
         background-color: #ffffff;
-        margin-top: 20px;
-        margin-bottom: 30px;
+        margin: 20px 10px;
+        display: block;
+        width: 35%;
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%234b2e83" d="M7 10l5 5 5-5z"/></svg>'); /* dropdown arrow */
+        background-repeat: no-repeat;
+        background-position: right 10px top 50%;
       }
       .drop-zone {
-        border: 2px dashed #ccc;
-        border-radius: 5px;
-        padding: 20px;
+        border: 2px dashed #c5b4e3;
+        border-radius: 12px;
+        padding: 30px;
         text-align: center;
+        background-color: #fff;
         cursor: pointer;
-        margin-bottom: 20px;
+        margin: 20px auto;
+        width: 80%;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
       }
       .drop-zone:hover,
       .drop-zone.dragover {
-        background-color: #f8f8f8;
+        background-color: #c5b4e32c;
+        border-color: #4b2e83;
       }
-      .drop-zone {
-        border: 2px dashed #ccc;
-        padding: 20px;
-        text-align: center;
+      .drop-zone p {
+        font-size: 1rem;
+        color: #333;
+      }
+      .drop-zone .browse-button {
+        background-color: #4b2e83;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
         cursor: pointer;
-        margin-bottom: 20px;
-      }
-      #fileName {
+        transition: background-color 0.3s;
         font-weight: bold;
+        margin-top: 15px;
+      }
+      .drop-zone .browse-button:hover {
+        background-color: c5b4e3;
+      }
+      .buttons-container {
+        text-align: center;
+        display: flex;
+        justify-content: center;
       }
       button {
-        background-color: rgba(51, 51, 51, 0.05);
-        border-radius: 8px;
-        border-width: 0;
-        color: #333333;
+        background-color: #4b2e83;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
         cursor: pointer;
         display: inline-block;
-        font-family: "Encode sans";
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
-        list-style: none;
-        margin: 0;
-        padding: 10px 12px;
-        text-align: center;
+        margin: 20px 10px;
+        transition: all 0.3s;
         font-weight: bold;
-        transition: background-color 0.2s;
       }
       button:hover {
-        background-color: rgba(175, 174, 174, 0.543);
+        background-color: #bba6e2;
+        color: #333;
+        transform: translateY(-2px);
       }
-      select {
-        padding: 10px;
-        font-size: 16px;
-        margin: 10px 0;
-      }
-      section {
-        margin-bottom: 20px;
-      }
-      #output {
+      #fileName {
+        font-size: 1rem;
+        color: #333;
         margin-top: 20px;
+      }
+      #output,
+      #winnersOverview,
+      #roundResultsContainer {
+        margin-top: 40px;
+        text-align: center;
+      }
+      .round-separator,
+      .position-separator {
+        border-top: 2px solid #ddd;
+        width: 80%;
+        margin: 20px auto;
+      }
+      .position-separator {
+        border-color: #4b2e83;
+      }
+      .outer-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 50%;
+        margin: 30px auto;
+        text-align: center;
       }
     </style>
   </head>
+
   <body>
     <header>
       <h1 class="title">ASUW IRV Elections</h1>
     </header>
     <main>
       <section>
-        <div id="dropZone" class="drop-zone">
-          Drag and drop a file here or click to select a file.
-          <br /><span id="fileName"><b>No file selected</b></span>
-          <input
-            type="file"
-            id="fileInput"
-            accept=".csv"
-            style="display: none"
-          />
+        <div id="uploadFileContainer" class="outer-box">
+          <div id="dropZone" class="drop-zone">
+            Drag and drop a file here or click to select a file.
+            <br /><span id="fileName"><b>No file selected</b></span>
+
+            <input
+              type="file"
+              id="fileInput"
+              accept=".csv"
+              style="display: none"
+            />
+          </div>
+          <button id="processButton" disabled>Process IRV</button>
         </div>
-        <button id="processButton" disabled>Process IRV</button>
-        <select id="positionDropdown" style="display: none"></select>
-        <button id="resultsByRoundButton" style="display: none">
-          Results by Round
-        </button>
+        <div class="buttons-container">
+          <button id="toggleOverviewButton" style="display: none">
+            Overview
+          </button>
+
+          <button id="resultsByRoundButton" style="display: none">
+            Results by Round
+          </button>
+          <select id="positionDropdown" style="display: none"></select>
+        </div>
         <section id="winnersOverview"></section>
         <div id="output"></div>
         <div id="roundResultsContainer" style="display: none"></div>
       </section>
     </main>
+    <!-- for pie charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
       let globalCsvData = null;
@@ -200,6 +259,14 @@
         const file = event.target.files[0];
         if (!file) return;
 
+        // Check if the file type is CSV
+        if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+          alert("Error: The file must be a CSV.");
+          document.getElementById("processButton").disabled = true;
+          fileNameElement.innerHTML = "<b>Please select a CSV file</b>";
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
           globalCsvData = e.target.result;
@@ -211,6 +278,9 @@
       function processButtonClick() {
         if (globalCsvData) {
           processData(globalCsvData);
+          document.getElementById("toggleOverviewButton").style.display =
+            "block"; // show overview button
+          document.getElementById("uploadFileContainer").style.display = "none"; // Hide the drop file box
         }
       }
 
@@ -238,13 +308,35 @@
           ? "Results by position"
           : "Results by Round";
       }
+      function toggleOverview() {
+        const overviewSection = document.getElementById("winnersOverview");
+        if (
+          overviewSection.style.display === "none" ||
+          overviewSection.style.display === ""
+        ) {
+          overviewSection.style.display = "block";
+          document.getElementById("toggleOverviewButton").textContent =
+            "Hide Overview";
+        } else {
+          overviewSection.style.display = "none";
+          document.getElementById("toggleOverviewButton").textContent =
+            "Show Overview";
+        }
+      }
+
+      document
+        .getElementById("toggleOverviewButton")
+        .addEventListener("click", toggleOverview);
 
       function processData(csvData) {
         const lines = csvData.split("\n");
         const headers = lines[0].split(",");
-        const positions = headers.map((header) =>
-          header.split("presidential")[0].trim()
-        );
+        const positions = headers.map((header) => {
+          // Use a regular expression to match either "presidential" or "choice"
+          const regex = /(presidential|choice)/;
+          const match = header.split(regex);
+          return match && match[0].trim(); // Trim the part before the match
+        });
         let uniquePositions = [...new Set(positions)];
 
         initializePositionDropdown(uniquePositions);
@@ -333,6 +425,7 @@
             );
 
           let roundOutput = generateRoundOutput(
+            position,
             round,
             sortedVotes,
             totalVotes,
@@ -354,7 +447,7 @@
             round++;
           }
         }
-
+        output += `<div class="position-separator"></div>`;
         return { positionOutput: output, positionRoundResults };
       }
 
@@ -395,13 +488,16 @@
       }
 
       function generateRoundOutput(
+        position,
         round,
         sortedVotes,
         totalVotes,
         eliminatedThisRound,
         allEliminatedCandidates
       ) {
-        let output = `<h3>Round ${round}</h3><table>`;
+        // Using a sanitized version of the position name to create a valid ID
+        const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
+        let output = `<h3>Round ${round} (${position})</h3><div><canvas id="chart${positionId}Round${round}" width="400" height="400"></canvas></div><table>`;
         output += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
 
         sortedVotes.forEach(([candidate, votes]) => {
@@ -410,6 +506,7 @@
         });
 
         output += `</table>`;
+
         if (eliminatedThisRound.length > 0) {
           output += `<p>Eliminated this round: ${eliminatedThisRound.join(
             ", "
@@ -420,8 +517,69 @@
             allEliminatedCandidates
           ).join(", ")}</p>`;
         }
+        output += `<div class="round-separator"></div>`;
+
+        setTimeout(
+          () =>
+            renderChart(
+              `chart${positionId}Round${round}`,
+              sortedVotes,
+              totalVotes,
+              position
+            ),
+          0
+        );
 
         return output;
+      }
+
+      function renderChart(canvasId, sortedVotes, totalVotes, position) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+        ctx.canvas.width = 300;
+        ctx.canvas.height = 300;
+        const data = {
+          labels: sortedVotes.map((vote) => vote[0]),
+          datasets: [
+            {
+              label: "Votes",
+              data: sortedVotes.map((vote) => vote[1]),
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(255, 206, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255,99,132,1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+                "rgba(255, 159, 64, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        };
+        new Chart(ctx, {
+          type: "pie",
+          data: data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    beginAtZero: true,
+                  },
+                },
+              ],
+            },
+          },
+        });
       }
 
       function declareWinner(sortedVotes, totalVotes, position) {

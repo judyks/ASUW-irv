@@ -1,354 +1,453 @@
 let globalCsvData = null;
-let winners = {};
+      let winners = {};
 
-document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("fileInput");
-  const processButton = document.getElementById("processButton");
-  const resultsByRoundButton = document.getElementById(
-    "resultsByRoundButton"
-  );
-  const dropZone = document.getElementById("dropZone");
-  const fileNameElement = document.getElementById("fileName");
+      document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("fileInput");
+        const processButton = document.getElementById("processButton");
+        const resultsByRoundButton = document.getElementById(
+          "resultsByRoundButton"
+        );
+        const dropZone = document.getElementById("dropZone");
+        const fileNameElement = document.getElementById("fileName");
 
-  fileInput.addEventListener("change", function (event) {
-    handleFileSelect(event);
-    if (fileInput.files.length > 0) {
-      fileNameElement.innerHTML =
-        "<b>" + fileInput.files[0].name + "</b>";
-    } else {
-      fileNameElement.innerHTML = "<b>No file selected</b>";
-    }
-  });
+        fileInput.addEventListener("change", function (event) {
+          handleFileSelect(event);
+          if (fileInput.files.length > 0) {
+            fileNameElement.innerHTML =
+              "<b>" + fileInput.files[0].name + "</b>";
+          } else {
+            fileNameElement.innerHTML = "<b>No file selected</b>";
+          }
+        });
 
-  processButton.addEventListener("click", processButtonClick);
-  document
-    .getElementById("positionDropdown")
-    .addEventListener("change", updateLocationHash);
-  resultsByRoundButton.addEventListener("click", toggleResultsDisplay);
+        processButton.addEventListener("click", processButtonClick);
+        document
+          .getElementById("positionDropdown")
+          .addEventListener("change", updateLocationHash);
+        resultsByRoundButton.addEventListener("click", toggleResultsDisplay);
 
-  dropZone.addEventListener("click", () => fileInput.click());
+        dropZone.addEventListener("click", () => fileInput.click());
 
-  dropZone.addEventListener("dragover", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    dropZone.classList.add("dragover");
-  });
+        dropZone.addEventListener("dragover", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.add("dragover");
+        });
 
-  dropZone.addEventListener("dragleave", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    dropZone.classList.remove("dragover");
-  });
+        dropZone.addEventListener("dragleave", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.remove("dragover");
+        });
 
-  dropZone.addEventListener("drop", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    dropZone.classList.remove("dragover");
+        dropZone.addEventListener("drop", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          dropZone.classList.remove("dragover");
 
-    const files = event.dataTransfer.files;
-    if (files.length) {
-      fileInput.files = files;
-      fileNameElement.textContent = files[0].name;
-      handleFileSelect({ target: { files } });
-    }
-  });
-});
+          const files = event.dataTransfer.files;
+          if (files.length) {
+            fileInput.files = files;
+            fileNameElement.textContent = files[0].name;
+            handleFileSelect({ target: { files } });
+          }
+        });
+      });
 
-function handleFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    globalCsvData = e.target.result;
-    document.getElementById("processButton").disabled = false;
-  };
-  reader.readAsText(file);
-}
+        // Check if the file type is CSV
+        if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+          alert("Error: The file must be a CSV.");
+          document.getElementById("processButton").disabled = true;
+          fileNameElement.innerHTML = "<b>Please select a CSV file</b>";
+          return;
+        }
 
-function processButtonClick() {
-  if (globalCsvData) {
-    processData(globalCsvData);
-  }
-}
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          globalCsvData = e.target.result;
+          document.getElementById("processButton").disabled = false;
+        };
+        reader.readAsText(file);
+      }
 
-function updateLocationHash() {
-  const positionDropdown = document.getElementById("positionDropdown");
-  if (positionDropdown.value) {
-    location.hash = `#${positionDropdown.value}`;
-  }
-}
+      function processButtonClick() {
+        if (globalCsvData) {
+          processData(globalCsvData);
+          document.getElementById("toggleOverviewButton").style.display =
+            "block"; // show overview button
+          document.getElementById("uploadFileContainer").style.display = "none"; // Hide the drop file box
+        }
+      }
 
-function toggleResultsDisplay() {
-  const roundResultsContainer = document.getElementById(
-    "roundResultsContainer"
-  );
-  const outputContainer = document.getElementById("output");
-  const positionDropdown = document.getElementById("positionDropdown");
-  const winnersOverview = document.getElementById("winnersOverview");
-  const isHidden = roundResultsContainer.style.display === "none";
+      function updateLocationHash() {
+        const positionDropdown = document.getElementById("positionDropdown");
+        if (positionDropdown.value) {
+          location.hash = `#${positionDropdown.value}`;
+        }
+      }
 
-  roundResultsContainer.style.display = isHidden ? "block" : "none";
-  outputContainer.style.display = isHidden ? "none" : "block";
-  positionDropdown.style.display = isHidden ? "none" : "block";
-  winnersOverview.style.display = isHidden ? "none" : "block";
-  document.getElementById("resultsByRoundButton").textContent = isHidden
-    ? "Results by position"
-    : "Results by Round";
-}
+      function toggleResultsDisplay() {
+        const roundResultsContainer = document.getElementById(
+          "roundResultsContainer"
+        );
+        const outputContainer = document.getElementById("output");
+        const positionDropdown = document.getElementById("positionDropdown");
+        const winnersOverview = document.getElementById("winnersOverview");
+        const isHidden = roundResultsContainer.style.display === "none";
 
-function processData(csvData) {
-  const lines = csvData.split("\n");
-  const headers = lines[0].split(",");
-  const positions = headers.map((header) =>
-    header.split("presidential")[0].trim()
-  );
-  let uniquePositions = [...new Set(positions)];
+        roundResultsContainer.style.display = isHidden ? "block" : "none";
+        outputContainer.style.display = isHidden ? "none" : "block";
+        positionDropdown.style.display = isHidden ? "none" : "block";
+        winnersOverview.style.display = isHidden ? "none" : "block";
+        document.getElementById("resultsByRoundButton").textContent = isHidden
+          ? "Results by position"
+          : "Results by Round";
+      }
+      function toggleOverview() {
+        const overviewSection = document.getElementById("winnersOverview");
+        if (
+          overviewSection.style.display === "none" ||
+          overviewSection.style.display === ""
+        ) {
+          overviewSection.style.display = "block";
+          document.getElementById("toggleOverviewButton").textContent =
+            "Hide Overview";
+        } else {
+          overviewSection.style.display = "none";
+          document.getElementById("toggleOverviewButton").textContent =
+            "Show Overview";
+        }
+      }
 
-  initializePositionDropdown(uniquePositions);
-  processPositions(positions, lines, uniquePositions);
-}
+      document
+        .getElementById("toggleOverviewButton")
+        .addEventListener("click", toggleOverview);
 
-function initializePositionDropdown(uniquePositions) {
-  const positionDropdown = document.getElementById("positionDropdown");
-  positionDropdown.style.display = "block";
-  positionDropdown.innerHTML =
-    '<option value="">Select position</option>' +
-    uniquePositions
-      .map(
-        (position) => `<option value="${position}">${position}</option>`
-      )
-      .join("");
-}
+      function processData(csvData) {
+        const lines = csvData.split("\n");
+        const headers = lines[0].split(",");
+        const positions = headers.map((header) => {
+          // Use a regular expression to match either "presidential" or "choice"
+          const regex = /(presidential|choice)/;
+          const match = header.split(regex);
+          return match && match[0].trim(); // Trim the part before the match
+        });
+        let uniquePositions = [...new Set(positions)];
 
-function processPositions(positions, lines, uniquePositions) {
-  let output = "Results by Position";
-  let roundResults = {};
+        initializePositionDropdown(uniquePositions);
+        processPositions(positions, lines, uniquePositions);
+      }
 
-  uniquePositions.forEach((position) => {
-    if (!isAllowedPosition(position)) return;
+      function initializePositionDropdown(uniquePositions) {
+        const positionDropdown = document.getElementById("positionDropdown");
+        positionDropdown.style.display = "block";
+        positionDropdown.innerHTML =
+          '<option value="">Select position</option>' +
+          uniquePositions
+            .map(
+              (position) => `<option value="${position}">${position}</option>`
+            )
+            .join("");
+      }
 
-    const { positionOutput, positionRoundResults } = createPositionOutput(
-      position,
-      lines
-    );
-    output += `<div id="${position}">${positionOutput}</div>`;
+      function processPositions(positions, lines, uniquePositions) {
+        let output = "Results by Position";
+        let roundResults = {};
 
-    positionRoundResults.forEach((roundResult, roundIndex) => {
-      roundResults[roundIndex] = roundResults[roundIndex] || [];
-      roundResults[roundIndex].push(
-        `<h4>Position: ${position}</h4>${roundResult}`
-      );
-    });
-  });
+        uniquePositions.forEach((position) => {
+          if (!isAllowedPosition(position)) return;
 
-  document.getElementById("output").innerHTML = output;
-  updateWinnersOverview();
-  document.getElementById("resultsByRoundButton").style.display = "block";
-  displayRoundResults(roundResults);
-}
+          const { positionOutput, positionRoundResults } = createPositionOutput(
+            position,
+            lines
+          );
+          output += `<div id="${position}">${positionOutput}</div>`;
 
-function isAllowedPosition(position) {
-  const positionName = [
-    "President",
-    "Vice President",
-    "Director of University Affairs",
-    "Director of Internal Policy",
-    "Director of Community Relations",
-    "Director of Diversity Efforts",
-    "Director of Programming",
-    "Director of Campus Partnerships",
-  ];
-  return positionName.some((header) =>
-    position.toLowerCase().startsWith(header.toLowerCase())
-  );
-}
+          positionRoundResults.forEach((roundResult, roundIndex) => {
+            roundResults[roundIndex] = roundResults[roundIndex] || [];
+            roundResults[roundIndex].push(
+              `<h4>Position: ${position}</h4>${roundResult}`
+            );
+          });
+        });
 
-function createPositionOutput(position, lines) {
-  let output = `<h2>${position}</h2>`;
-  let positionVotes = getPositionVotes(position, lines);
-  let round = 1;
-  let eliminatedCandidates = new Set();
-  let positionRoundResults = [];
-  let winnerDeclared = false;
+        document.getElementById("output").innerHTML = output;
+        updateWinnersOverview();
+        document.getElementById("resultsByRoundButton").style.display = "block";
+        displayRoundResults(roundResults);
+      }
 
-  while (!winnerDeclared) {
-    let { voteCounts, totalVotes } = countVotes(
-      positionVotes,
-      eliminatedCandidates
-    );
-    if (Object.keys(voteCounts).length === 0) {
-      output += `<p>No remaining candidates to process for this position.</p>`;
-      break;
-    }
+      function isAllowedPosition(position) {
+        const positionName = [
+          "President",
+          "Vice President",
+          "Director of University Affairs",
+          "Director of Internal Policy",
+          "Director of Community Relations",
+          "Director of Diversity Efforts",
+          "Director of Programming",
+          "Director of Campus Partnerships",
+        ];
+        return positionName.some((header) =>
+          position.toLowerCase().startsWith(header.toLowerCase())
+        );
+      }
 
-    let sortedVotes = sortVotes(voteCounts);
-    let { newEliminatedCandidates, eliminatedThisRound, isTie } =
-      updateEliminatedCandidates(
+      function createPositionOutput(position, lines) {
+        let output = `<h2>${position}</h2>`;
+        let positionVotes = getPositionVotes(position, lines);
+        let round = 1;
+        let eliminatedCandidates = new Set();
+        let positionRoundResults = [];
+        let winnerDeclared = false;
+
+        while (!winnerDeclared) {
+          let { voteCounts, totalVotes } = countVotes(
+            positionVotes,
+            eliminatedCandidates
+          );
+          if (Object.keys(voteCounts).length === 0) {
+            output += `<p>No remaining candidates to process for this position.</p>`;
+            break;
+          }
+
+          let sortedVotes = sortVotes(voteCounts);
+          let { newEliminatedCandidates, eliminatedThisRound, isTie } =
+            updateEliminatedCandidates(
+              sortedVotes,
+              eliminatedCandidates,
+              totalVotes
+            );
+
+          let roundOutput = generateRoundOutput(
+            position,
+            round,
+            sortedVotes,
+            totalVotes,
+            eliminatedThisRound,
+            eliminatedCandidates
+          );
+          output += roundOutput;
+          positionRoundResults.push(roundOutput);
+
+          if (
+            isTie ||
+            sortedVotes[0][1] > totalVotes / 2 ||
+            sortedVotes.length === 1
+          ) {
+            output += declareWinner(sortedVotes, totalVotes, position);
+            winnerDeclared = true;
+          } else {
+            eliminatedCandidates = newEliminatedCandidates;
+            round++;
+          }
+        }
+        output += `<div class="position-separator"></div>`;
+        return { positionOutput: output, positionRoundResults };
+      }
+
+      function getPositionVotes(position, lines) {
+        return lines
+          .slice(1)
+          .map((line) =>
+            line
+              .split(",")
+              .filter((_, index) =>
+                lines[0].split(",")[index].trim().startsWith(position)
+              )
+              .map((pref) => pref.trim())
+              .filter((pref) => pref)
+          )
+          .filter((vote) => vote.length > 0);
+      }
+
+      function countVotes(positionVotes, eliminatedCandidates) {
+        let voteCounts = {};
+        let totalVotes = 0;
+
+        positionVotes.forEach((vote) => {
+          const firstPref = vote.find(
+            (pref) => !eliminatedCandidates.has(pref)
+          );
+          if (firstPref) {
+            voteCounts[firstPref] = (voteCounts[firstPref] || 0) + 1;
+            totalVotes++;
+          }
+        });
+
+        return { voteCounts, totalVotes };
+      }
+
+      function sortVotes(voteCounts) {
+        return Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
+      }
+
+      function generateRoundOutput(
+        position,
+        round,
+        sortedVotes,
+        totalVotes,
+        eliminatedThisRound,
+        allEliminatedCandidates
+      ) {
+        // Using a sanitized version of the position name to create a valid ID
+        const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
+        let output = `<h3>Round ${round} (${position})</h3><div><canvas id="chart${positionId}Round${round}" width="400" height="400"></canvas></div><table>`;
+        output += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
+
+        sortedVotes.forEach(([candidate, votes]) => {
+          const percentage = ((votes / totalVotes) * 100).toFixed(2);
+          output += `<tr><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td></tr>`;
+        });
+
+        output += `</table>`;
+
+        if (eliminatedThisRound.length > 0) {
+          output += `<p>Eliminated this round: ${eliminatedThisRound.join(
+            ", "
+          )}</p>`;
+        }
+        if (allEliminatedCandidates.size > 0) {
+          output += `<p>Eliminated candidates so far: ${Array.from(
+            allEliminatedCandidates
+          ).join(", ")}</p>`;
+        }
+        output += `<div class="round-separator"></div>`;
+
+        setTimeout(
+          () =>
+            renderChart(
+              `chart${positionId}Round${round}`,
+              sortedVotes,
+              totalVotes,
+              position
+            ),
+          0
+        );
+
+        return output;
+      }
+
+      function renderChart(canvasId, sortedVotes, totalVotes, position) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+        ctx.canvas.width = 300;
+        ctx.canvas.height = 300;
+        const data = {
+          labels: sortedVotes.map((vote) => vote[0]),
+          datasets: [
+            {
+              label: "Votes",
+              data: sortedVotes.map((vote) => vote[1]),
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(255, 206, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255,99,132,1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+                "rgba(255, 159, 64, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        };
+        new Chart(ctx, {
+          type: "pie",
+          data: data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    beginAtZero: true,
+                  },
+                },
+              ],
+            },
+          },
+        });
+      }
+
+      function declareWinner(sortedVotes, totalVotes, position) {
+        // Check if there's a tie between the last two candidates
+        if (
+          sortedVotes.length === 2 &&
+          sortedVotes[0][1] === sortedVotes[1][1]
+        ) {
+          return `<h4>There is a tie. Ties are resolved using a process that is determined by the Elections Administration Committee.</h4>`;
+        } else {
+          const winner = sortedVotes[0][0];
+          const maxVotes = sortedVotes[0][1];
+          const winnerPercentage = ((maxVotes / totalVotes) * 100).toFixed(2);
+          winners[position] = {
+            name: winner,
+            votes: maxVotes,
+            percentage: winnerPercentage,
+          };
+          return `<h4>Winner: ${winner} with ${maxVotes} votes (${winnerPercentage}% of total votes)</h4>`;
+        }
+      }
+
+      function updateEliminatedCandidates(
         sortedVotes,
         eliminatedCandidates,
         totalVotes
-      );
+      ) {
+        let newEliminatedCandidates = new Set(eliminatedCandidates);
+        let minVotes = sortedVotes[sortedVotes.length - 1][1];
+        let candidatesForElimination = sortedVotes
+          .filter(([_, votes]) => votes === minVotes)
+          .map(([candidate]) => candidate);
+        let isTie =
+          sortedVotes.length === 2 && sortedVotes[0][1] === sortedVotes[1][1];
 
-    let roundOutput = generateRoundOutput(
-      round,
-      sortedVotes,
-      totalVotes,
-      eliminatedThisRound,
-      eliminatedCandidates
-    );
-    output += roundOutput;
-    positionRoundResults.push(roundOutput);
+        if (!isTie) {
+          candidatesForElimination.forEach((candidate) =>
+            newEliminatedCandidates.add(candidate)
+          );
+        }
 
-    if (
-      isTie ||
-      sortedVotes[0][1] > totalVotes / 2 ||
-      sortedVotes.length === 1
-    ) {
-      output += declareWinner(sortedVotes, totalVotes, position);
-      winnerDeclared = true;
-    } else {
-      eliminatedCandidates = newEliminatedCandidates;
-      round++;
-    }
-  }
+        return {
+          newEliminatedCandidates,
+          eliminatedThisRound: isTie ? [] : candidatesForElimination,
+          isTie,
+        };
+      }
 
-  return { positionOutput: output, positionRoundResults };
-}
+      // currently overview only shows positions with winners (doesn't show results for positions with ties)
+      function updateWinnersOverview() {
+        let overviewHtml = "<h3>Overview</h3><table>";
+        overviewHtml +=
+          "<tr><th>Position</th><th>Winner</th><th>Votes</th><th>Percentage</th></tr>";
 
-function getPositionVotes(position, lines) {
-  return lines
-    .slice(1)
-    .map((line) =>
-      line
-        .split(",")
-        .filter((_, index) =>
-          lines[0].split(",")[index].trim().startsWith(position)
-        )
-        .map((pref) => pref.trim())
-        .filter((pref) => pref)
-    )
-    .filter((vote) => vote.length > 0);
-}
+        for (const position in winners) {
+          overviewHtml += `<tr><td>${position}</td><td>${winners[position].name}</td><td>${winners[position].votes}</td><td>${winners[position].percentage}%</td></tr>`;
+        }
 
-function countVotes(positionVotes, eliminatedCandidates) {
-  let voteCounts = {};
-  let totalVotes = 0;
+        overviewHtml += "</table>";
+        document.getElementById("winnersOverview").innerHTML = overviewHtml;
+      }
 
-  positionVotes.forEach((vote) => {
-    const firstPref = vote.find(
-      (pref) => !eliminatedCandidates.has(pref)
-    );
-    if (firstPref) {
-      voteCounts[firstPref] = (voteCounts[firstPref] || 0) + 1;
-      totalVotes++;
-    }
-  });
-
-  return { voteCounts, totalVotes };
-}
-
-function sortVotes(voteCounts) {
-  return Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
-}
-
-function generateRoundOutput(
-  round,
-  sortedVotes,
-  totalVotes,
-  eliminatedThisRound,
-  allEliminatedCandidates
-) {
-  let output = `<h3>Round ${round}</h3><table>`;
-  output += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
-
-  sortedVotes.forEach(([candidate, votes]) => {
-    const percentage = ((votes / totalVotes) * 100).toFixed(2);
-    output += `<tr><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td></tr>`;
-  });
-
-  output += `</table>`;
-  if (eliminatedThisRound.length > 0) {
-    output += `<p>Eliminated this round: ${eliminatedThisRound.join(
-      ", "
-    )}</p>`;
-  }
-  if (allEliminatedCandidates.size > 0) {
-    output += `<p>Eliminated candidates so far: ${Array.from(
-      allEliminatedCandidates
-    ).join(", ")}</p>`;
-  }
-
-  return output;
-}
-
-function declareWinner(sortedVotes, totalVotes, position) {
-  // Check if there's a tie between the last two candidates
-  if (
-    sortedVotes.length === 2 &&
-    sortedVotes[0][1] === sortedVotes[1][1]
-  ) {
-    return `<h4>There is a tie. Ties are resolved using a process that is determined by the Elections Administration Committee.</h4>`;
-  } else {
-    const winner = sortedVotes[0][0];
-    const maxVotes = sortedVotes[0][1];
-    const winnerPercentage = ((maxVotes / totalVotes) * 100).toFixed(2);
-    winners[position] = {
-      name: winner,
-      votes: maxVotes,
-      percentage: winnerPercentage,
-    };
-    return `<h4>Winner: ${winner} with ${maxVotes} votes (${winnerPercentage}% of total votes)</h4>`;
-  }
-}
-
-function updateEliminatedCandidates(
-  sortedVotes,
-  eliminatedCandidates,
-  totalVotes
-) {
-  let newEliminatedCandidates = new Set(eliminatedCandidates);
-  let minVotes = sortedVotes[sortedVotes.length - 1][1];
-  let candidatesForElimination = sortedVotes
-    .filter(([_, votes]) => votes === minVotes)
-    .map(([candidate]) => candidate);
-  let isTie =
-    sortedVotes.length === 2 && sortedVotes[0][1] === sortedVotes[1][1];
-
-  if (!isTie) {
-    candidatesForElimination.forEach((candidate) =>
-      newEliminatedCandidates.add(candidate)
-    );
-  }
-
-  return {
-    newEliminatedCandidates,
-    eliminatedThisRound: isTie ? [] : candidatesForElimination,
-    isTie,
-  };
-}
-
-// currently overview only shows positions with winners (doesn't show results for positions with ties)
-function updateWinnersOverview() {
-  let overviewHtml = "<h3>Overview</h3><table>";
-  overviewHtml +=
-    "<tr><th>Position</th><th>Winner</th><th>Votes</th><th>Percentage</th></tr>";
-
-  for (const position in winners) {
-    overviewHtml += `<tr><td>${position}</td><td>${winners[position].name}</td><td>${winners[position].votes}</td><td>${winners[position].percentage}%</td></tr>`;
-  }
-
-  overviewHtml += "</table>";
-  document.getElementById("winnersOverview").innerHTML = overviewHtml;
-}
-
-function displayRoundResults(roundResults) {
-  let roundResultsOutput = "<h1>Results by round</h1>";
-  Object.keys(roundResults).forEach((round) => {
-    roundResultsOutput +=
-      `<h2>Round ${parseInt(round) + 1}</h2>` +
-      roundResults[round].join("");
-  });
-  document.getElementById("roundResultsContainer").innerHTML =
-    roundResultsOutput;
-}
+      function displayRoundResults(roundResults) {
+        let roundResultsOutput = "<h1>Results by round</h1>";
+        Object.keys(roundResults).forEach((round) => {
+          roundResultsOutput +=
+            `<h2>Round ${parseInt(round) + 1}</h2>` +
+            roundResults[round].join("");
+        });
+        document.getElementById("roundResultsContainer").innerHTML =
+          roundResultsOutput;
+      }
