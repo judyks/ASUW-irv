@@ -110,6 +110,14 @@
       #output {
         margin-top: 20px;
       }
+      /* New CSS */
+      .buttons-container {
+        text-align: center;
+      }
+      .buttons-container button,
+      .buttons-container select {
+        margin: 10px;
+      }
     </style>
   </head>
   <body>
@@ -128,11 +136,13 @@
             style="display: none"
           />
         </div>
-        <button id="processButton" disabled>Process IRV</button>
-        <select id="positionDropdown" style="display: none"></select>
-        <button id="resultsByRoundButton" style="display: none">
-          Results by Round
-        </button>
+        <div class="buttons-container">
+          <button id="processButton" disabled>Process IRV</button>
+          <select id="positionDropdown" style="display: none"></select>
+          <button id="resultsByRoundButton" style="display: none">
+            Results by Round
+          </button>
+        </div>
         <section id="winnersOverview"></section>
         <div id="output"></div>
         <div id="roundResultsContainer" style="display: none"></div>

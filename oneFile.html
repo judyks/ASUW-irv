@@ -425,15 +425,23 @@
       }
 
       function declareWinner(sortedVotes, totalVotes, position) {
-        const winner = sortedVotes[0][0];
-        const maxVotes = sortedVotes[0][1];
-        const winnerPercentage = ((maxVotes / totalVotes) * 100).toFixed(2);
-        winners[position] = {
-          name: winner,
-          votes: maxVotes,
-          percentage: winnerPercentage,
-        };
-        return `<h4>Winner: ${winner} with ${maxVotes} votes (${winnerPercentage}% of total votes)</h4>`;
+        // Check if there's a tie between the last two candidates
+        if (
+          sortedVotes.length === 2 &&
+          sortedVotes[0][1] === sortedVotes[1][1]
+        ) {
+          return `<h4>There is a tie. Ties are resolved using a process that is determined by the Elections Administration Committee.</h4>`;
+        } else {
+          const winner = sortedVotes[0][0];
+          const maxVotes = sortedVotes[0][1];
+          const winnerPercentage = ((maxVotes / totalVotes) * 100).toFixed(2);
+          winners[position] = {
+            name: winner,
+            votes: maxVotes,
+            percentage: winnerPercentage,
+          };
+          return `<h4>Winner: ${winner} with ${maxVotes} votes (${winnerPercentage}% of total votes)</h4>`;
+        }
       }
 
       function updateEliminatedCandidates(
