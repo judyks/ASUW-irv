@@ -96,6 +96,7 @@ function toggleResultsDisplay() {
 
   roundResultsContainer.style.display = isHidden ? "block" : "none";
   outputContainer.style.display = isHidden ? "none" : "block";
+  positionDropdown.style.display = "none";
   document.getElementById("resultsByRoundButton").textContent = isHidden
     ? "Results by Position"
     : "Results by Round";

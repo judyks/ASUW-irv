@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IRV ASUW Elections</title>
+    <title>ASUW IRV Elections</title>
     <style>
       body {
         background-color: #f4f7fa;
@@ -50,9 +50,9 @@
         margin-top: 20px;
         border-radius: 20px;
         border: 1px solid #cccccc;
-        padding: 10px 20px; /* Add padding for better spacing */
-        display: inline-block; /* Ensure the border wraps around the content */
-        background-color: #f9f9f9; /* Add background color for better contrast */
+        padding: 10px 20px;
+        display: inline-block;
+        background-color: #f9f9f9;
       }
 
       #positionDropdown,
@@ -329,6 +329,7 @@
 
         roundResultsContainer.style.display = isHidden ? "block" : "none";
         outputContainer.style.display = isHidden ? "none" : "block";
+        positionDropdown.style.display = "none";
         document.getElementById("resultsByRoundButton").textContent = isHidden
           ? "Results by Position"
           : "Results by Round";
