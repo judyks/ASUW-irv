@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IRV ASUW Elections</title>
     <style>
-      @font-face {
-        font-family: "Encode Sans";
-        src: url("Encode Sans Normal/encode-sans.ttf") format("ttf");
-      }
       body {
         background-color: #f4f7fa;
         margin: 0;
@@ -39,7 +35,7 @@
         background-color: #f9f9f9;
       }
       th {
-        background-color: #4b2e83;
+        background-color: #8d8c8e;
         color: white;
       }
       h2 {
@@ -50,25 +46,31 @@
       }
       h3 {
         font-size: 1em;
-        color: #333;
+        color: #333333d0;
         margin-top: 20px;
+        border-radius: 20px;
+        border: 1px solid #cccccc;
+        padding: 10px 20px; /* Add padding for better spacing */
+        display: inline-block; /* Ensure the border wraps around the content */
+        background-color: #f9f9f9; /* Add background color for better contrast */
       }
+
       #positionDropdown,
       select {
         padding: 10px;
-        border-radius: 4px;
+        border-radius: 20px;
         border: 1px solid #cccccc;
         background-color: #ffffff;
         margin: 20px 10px;
         display: block;
-        width: 35%;
+        width: 25%;
         appearance: none;
         background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%234b2e83" d="M7 10l5 5 5-5z"/></svg>'); /* dropdown arrow */
         background-repeat: no-repeat;
         background-position: right 10px top 50%;
       }
       .drop-zone {
-        border: 2px dashed #c5b4e3;
+        border: 2px dashed #86838a7e;
         border-radius: 12px;
         padding: 30px;
         text-align: center;
@@ -85,15 +87,15 @@
       }
       .drop-zone:hover,
       .drop-zone.dragover {
-        background-color: #c5b4e32c;
-        border-color: #4b2e83;
+        background-color: #d8d6db42;
+        border-color: #86838aa9;
       }
       .drop-zone p {
         font-size: 1rem;
         color: #333;
       }
       .drop-zone .browse-button {
-        background-color: #4b2e83;
+        background-color: #858389;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -104,7 +106,7 @@
         margin-top: 15px;
       }
       .drop-zone .browse-button:hover {
-        background-color: c5b4e3;
+        background-color: #c5b4e3;
       }
       .buttons-container {
         text-align: center;
@@ -112,8 +114,8 @@
         justify-content: center;
       }
       button {
-        background-color: #4b2e83;
-        color: white;
+        background-color: #e2e1e4;
+        color: #333;
         border: none;
         padding: 10px 20px;
         border-radius: 20px;
@@ -124,8 +126,8 @@
         font-weight: bold;
       }
       button:hover {
-        background-color: #bba6e2;
-        color: #333;
+        background-color: #87858aa4;
+        color: white;
         transform: translateY(-2px);
       }
       #fileName {
@@ -136,17 +138,16 @@
       #output,
       #winnersOverview,
       #roundResultsContainer {
-        margin-top: 40px;
+        margin-top: 50px;
         text-align: center;
       }
-      .round-separator,
+      #winnersOverview {
+        margin-bottom: 80px;
+      }
       .position-separator {
         border-top: 2px solid #ddd;
         width: 80%;
-        margin: 20px auto;
-      }
-      .position-separator {
-        border-color: #4b2e83;
+        margin: 50px auto;
       }
       .outer-box {
         background-color: #fff;
@@ -157,17 +158,46 @@
         margin: 30px auto;
         text-align: center;
       }
+      .file-icon-container {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #d4d3d5ab;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px transparent #fff;
+        margin-bottom: 20px;
+      }
+
+      .file-icon {
+        font-size: 3rem;
+        color: #fff;
+      }
+
+      .logo img {
+        max-width: 150px;
+        height: auto;
+      }
     </style>
   </head>
 
   <body>
     <header>
-      <h1 class="title">ASUW IRV Elections</h1>
+      <header class="header">
+        <div class="logo">
+          <img src="images/logo.png" alt="ASUW Logo" />
+        </div>
+        <h1 class="title">ASUW IRV Elections</h1>
+      </header>
     </header>
     <main>
       <section>
         <div id="uploadFileContainer" class="outer-box">
           <div id="dropZone" class="drop-zone">
+            <div class="file-icon-container">
+              <span class="file-icon">⬆</span>
+            </div>
             Drag and drop a file here or click to select a file.
             <br /><span id="fileName"><b>No file selected</b></span>
 
@@ -184,9 +214,11 @@
           <button id="toggleOverviewButton" style="display: none">
             Overview
           </button>
-
           <button id="resultsByRoundButton" style="display: none">
             Results by Round
+          </button>
+          <button id="voterStatsButton" style="display: none">
+            Voter Statistics
           </button>
           <select id="positionDropdown" style="display: none"></select>
         </div>
@@ -202,31 +234,120 @@
       let globalCsvData = null;
       let winners = {};
 
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", initialize);
+
+      function initialize() {
         const fileInput = document.getElementById("fileInput");
         const processButton = document.getElementById("processButton");
+        const dropZone = document.getElementById("dropZone");
+        const fileNameElement = document.getElementById("fileName");
+        const positionDropdown = document.getElementById("positionDropdown");
         const resultsByRoundButton = document.getElementById(
           "resultsByRoundButton"
         );
-        const dropZone = document.getElementById("dropZone");
-        const fileNameElement = document.getElementById("fileName");
+        const toggleOverviewButton = document.getElementById(
+          "toggleOverviewButton"
+        );
 
-        fileInput.addEventListener("change", function (event) {
-          handleFileSelect(event);
-          if (fileInput.files.length > 0) {
-            fileNameElement.innerHTML =
-              "<b>" + fileInput.files[0].name + "</b>";
-          } else {
-            fileNameElement.innerHTML = "<b>No file selected</b>";
-          }
-        });
+        addEventListeners(
+          fileInput,
+          processButton,
+          dropZone,
+          fileNameElement,
+          positionDropdown,
+          resultsByRoundButton,
+          toggleOverviewButton
+        );
+      }
 
+      function addEventListeners(
+        fileInput,
+        processButton,
+        dropZone,
+        fileNameElement,
+        positionDropdown,
+        resultsByRoundButton,
+        toggleOverviewButton
+      ) {
+        fileInput.addEventListener("change", (event) =>
+          handleFileSelect(event, fileNameElement, processButton)
+        );
         processButton.addEventListener("click", processButtonClick);
-        document
-          .getElementById("positionDropdown")
-          .addEventListener("change", updateLocationHash);
+        positionDropdown.addEventListener("change", updateLocationHash);
         resultsByRoundButton.addEventListener("click", toggleResultsDisplay);
+        toggleOverviewButton.addEventListener("click", toggleOverview);
 
+        setupDropZoneEvents(dropZone, fileInput, fileNameElement);
+      }
+
+      function handleFileSelect(event, fileNameElement, processButton) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+          alert("Error: The file must be a CSV.");
+          processButton.disabled = true;
+          fileNameElement.innerHTML = "<b>Please select a CSV file</b>";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          globalCsvData = e.target.result;
+          processButton.disabled = false;
+        };
+        reader.readAsText(file);
+
+        fileNameElement.innerHTML = file
+          ? `<b>${file.name}</b>`
+          : "<b>No file selected</b>";
+      }
+
+      function processButtonClick() {
+        if (globalCsvData) {
+          processData(globalCsvData);
+          document.getElementById("uploadFileContainer").style.display = "none";
+          document.getElementById("toggleOverviewButton").style.display =
+            "block";
+          document.getElementById("voterStatsButton").style.display = "block";
+        }
+      }
+
+      function updateLocationHash() {
+        const positionDropdown = document.getElementById("positionDropdown");
+        if (positionDropdown.value) {
+          location.hash = `#${positionDropdown.value}`;
+        }
+      }
+
+      function toggleResultsDisplay() {
+        const roundResultsContainer = document.getElementById(
+          "roundResultsContainer"
+        );
+        const outputContainer = document.getElementById("output");
+        const isHidden = roundResultsContainer.style.display === "none";
+
+        roundResultsContainer.style.display = isHidden ? "block" : "none";
+        outputContainer.style.display = isHidden ? "none" : "block";
+        document.getElementById("resultsByRoundButton").textContent = isHidden
+          ? "Results by Position"
+          : "Results by Round";
+      }
+
+      function toggleOverview() {
+        const overviewSection = document.getElementById("winnersOverview");
+        overviewSection.style.display =
+          overviewSection.style.display === "none" ||
+          overviewSection.style.display === ""
+            ? "block"
+            : "none";
+        document.getElementById("toggleOverviewButton").textContent =
+          overviewSection.style.display === "block"
+            ? "Hide Overview"
+            : "Show Overview";
+      }
+
+      function setupDropZoneEvents(dropZone, fileInput, fileNameElement) {
         dropZone.addEventListener("click", () => fileInput.click());
 
         dropZone.addEventListener("dragover", (event) => {
@@ -250,97 +371,32 @@
           if (files.length) {
             fileInput.files = files;
             fileNameElement.textContent = files[0].name;
-            handleFileSelect({ target: { files } });
+            handleFileSelect(
+              { target: { files } },
+              fileNameElement,
+              document.getElementById("processButton")
+            );
           }
         });
-      });
-
-      function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // Check if the file type is CSV
-        if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-          alert("Error: The file must be a CSV.");
-          document.getElementById("processButton").disabled = true;
-          fileNameElement.innerHTML = "<b>Please select a CSV file</b>";
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          globalCsvData = e.target.result;
-          document.getElementById("processButton").disabled = false;
-        };
-        reader.readAsText(file);
       }
-
-      function processButtonClick() {
-        if (globalCsvData) {
-          processData(globalCsvData);
-          document.getElementById("toggleOverviewButton").style.display =
-            "block"; // show overview button
-          document.getElementById("uploadFileContainer").style.display = "none"; // Hide the drop file box
-        }
-      }
-
-      function updateLocationHash() {
-        const positionDropdown = document.getElementById("positionDropdown");
-        if (positionDropdown.value) {
-          location.hash = `#${positionDropdown.value}`;
-        }
-      }
-
-      function toggleResultsDisplay() {
-        const roundResultsContainer = document.getElementById(
-          "roundResultsContainer"
-        );
-        const outputContainer = document.getElementById("output");
-        const positionDropdown = document.getElementById("positionDropdown");
-        const winnersOverview = document.getElementById("winnersOverview");
-        const isHidden = roundResultsContainer.style.display === "none";
-
-        roundResultsContainer.style.display = isHidden ? "block" : "none";
-        outputContainer.style.display = isHidden ? "none" : "block";
-        positionDropdown.style.display = isHidden ? "none" : "block";
-        winnersOverview.style.display = isHidden ? "none" : "block";
-        document.getElementById("resultsByRoundButton").textContent = isHidden
-          ? "Results by position"
-          : "Results by Round";
-      }
-      function toggleOverview() {
-        const overviewSection = document.getElementById("winnersOverview");
-        if (
-          overviewSection.style.display === "none" ||
-          overviewSection.style.display === ""
-        ) {
-          overviewSection.style.display = "block";
-          document.getElementById("toggleOverviewButton").textContent =
-            "Hide Overview";
-        } else {
-          overviewSection.style.display = "none";
-          document.getElementById("toggleOverviewButton").textContent =
-            "Show Overview";
-        }
-      }
-
-      document
-        .getElementById("toggleOverviewButton")
-        .addEventListener("click", toggleOverview);
 
       function processData(csvData) {
         const lines = csvData.split("\n");
         const headers = lines[0].split(",");
-        const positions = headers.map((header) => {
-          // Use a regular expression to match either "presidential" or "choice"
-          const regex = /(presidential|choice)/;
-          const match = header.split(regex);
-          return match && match[0].trim(); // Trim the part before the match
-        });
+        const positions = extractPositionsFromHeaders(headers);
         let uniquePositions = [...new Set(positions)];
 
         initializePositionDropdown(uniquePositions);
         processPositions(positions, lines, uniquePositions);
+      }
+
+      function extractPositionsFromHeaders(headers) {
+        return headers.map((header) => {
+          // Use a regular expression to match either "presidential" or "choice" from headers
+          const regex = /(presidential|choice)/;
+          const match = header.split(regex);
+          return match && match[0].trim(); // Trim the part before the match
+        });
       }
 
       function initializePositionDropdown(uniquePositions) {
@@ -356,7 +412,8 @@
       }
 
       function processPositions(positions, lines, uniquePositions) {
-        let output = "Results by Position";
+        // let output = "Results by Position";
+        let output = "<h1>Results by Pound</h1>";
         let roundResults = {};
 
         uniquePositions.forEach((position) => {
@@ -508,16 +565,15 @@
         output += `</table>`;
 
         if (eliminatedThisRound.length > 0) {
-          output += `<p>Eliminated this round: ${eliminatedThisRound.join(
+          output += `<p><b>Eliminated this round:</b>  ${eliminatedThisRound.join(
             ", "
           )}</p>`;
         }
         if (allEliminatedCandidates.size > 0) {
-          output += `<p>Eliminated candidates so far: ${Array.from(
+          output += `<p><b>Eliminated candidates so far:</b> ${Array.from(
             allEliminatedCandidates
           ).join(", ")}</p>`;
         }
-        output += `<div class="round-separator"></div>`;
 
         setTimeout(
           () =>
@@ -630,7 +686,7 @@
 
       // currently overview only shows positions with winners (doesn't show results for positions with ties)
       function updateWinnersOverview() {
-        let overviewHtml = "<h3>Overview</h3><table>";
+        let overviewHtml = "<h2>Overview</h2><table>";
         overviewHtml +=
           "<tr><th>Position</th><th>Winner</th><th>Votes</th><th>Percentage</th></tr>";
 
@@ -646,7 +702,7 @@
         let roundResultsOutput = "<h1>Results by round</h1>";
         Object.keys(roundResults).forEach((round) => {
           roundResultsOutput +=
-            `<h2>Round ${parseInt(round) + 1}</h2>` +
+            `<h2>ROUND ${parseInt(round) + 1}</h2>` +
             roundResults[round].join("");
         });
         document.getElementById("roundResultsContainer").innerHTML =
