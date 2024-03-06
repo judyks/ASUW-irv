@@ -76,7 +76,7 @@
         <div id="output"></div>
       </section>
     </main>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
       let globalCsvData = null;
 
@@ -111,10 +111,10 @@
         reader.readAsText(file);
       }
 
-      function processData(csvData) {
-        const lines = csvData.split("\n");
-        const headers = lines[0].split(",");
-        const positions = headers.map((header) =>
+      async function processData(csvData) {
+        const csvDataProto = await Papa.parse(csvData, { header: true });
+        const headersProto = csvDataProto.meta.fields;
+        const positions = headersProto.map((header) =>
           header.split("presidential")[0].trim()
         );
         let output = "";
@@ -135,15 +135,15 @@
 
           output += `<div id="${position}">${createPositionOutput(
             position,
-            lines
+            csvDataProto
           )}</div>`;
         });
 
         document.getElementById("output").innerHTML = output;
       }
-      function createPositionOutput(position, lines) {
+      function createPositionOutput(position, csvDataProto) {
         let output = `<h2>${position}</h2>`;
-        let positionVotes = getPositionVotes(position, lines);
+        let positionVotes = getPositionVotes(position, csvDataProto);
         let round = 1;
         let eliminatedCandidates = new Set();
 
@@ -209,19 +209,13 @@
       }
 
       // Additional JavaScript functions for countVotes, sortVotes, generateRoundOutput, declareWinner, updateEliminatedCandidates, and getPositionVotes would be defined here to modularize the code.
-      function getPositionVotes(position, lines) {
-        return lines
-          .slice(1)
-          .map((line) => {
-            return line
-              .split(",")
-              .filter((_, index) =>
-                lines[0].split(",")[index].trim().startsWith(position)
-              )
-              .map((pref) => pref.trim())
-              .filter((pref) => pref);
-          })
-          .filter((vote) => vote.length > 0);
+      function getPositionVotes(position, csvDataProto) {
+        return csvDataProto.data.map(line =>
+          csvDataProto.meta.fields
+          .filter(field => field.trim().startsWith(position))
+          .map(field => line[field].trim())
+          .filter((pref) => pref))
+        .filter((vote) => vote.length > 0);
       }
 
       function countVotes(positionVotes, eliminatedCandidates) {
