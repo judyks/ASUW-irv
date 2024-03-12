@@ -546,6 +546,50 @@
         return Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
       }
 
+      // function generateRoundOutput(
+      //   position,
+      //   round,
+      //   sortedVotes,
+      //   totalVotes,
+      //   eliminatedThisRound,
+      //   allEliminatedCandidates
+      // ) {
+      //   // Using a sanitized version of the position name to create a valid ID
+      //   const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
+      //   let output = `<h3>Round ${round} (${position})</h3><div><canvas id="chart${positionId}Round${round}" width="400" height="400"></canvas></div><table>`;
+      //   output += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
+
+      //   sortedVotes.forEach(([candidate, votes]) => {
+      //     const percentage = ((votes / totalVotes) * 100).toFixed(2);
+      //     output += `<tr><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td></tr>`;
+      //   });
+
+      //   output += `</table>`;
+
+      //   if (eliminatedThisRound.length > 0) {
+      //     output += `<p><b>Eliminated this round:</b>  ${eliminatedThisRound.join(
+      //       ", "
+      //     )}</p>`;
+      //   }
+      //   if (allEliminatedCandidates.size > 0) {
+      //     output += `<p><b>Eliminated candidates so far:</b> ${Array.from(
+      //       allEliminatedCandidates
+      //     ).join(", ")}</p>`;
+      //   }
+
+      //   setTimeout(
+      //     () =>
+      //       renderChart(
+      //         `chart${positionId}Round${round}`,
+      //         sortedVotes,
+      //         totalVotes,
+      //         position
+      //       ),
+      //     0
+      //   );
+
+      //   return output;
+      // }
       function generateRoundOutput(
         position,
         round,
@@ -555,38 +599,50 @@
         allEliminatedCandidates
       ) {
         // Using a sanitized version of the position name to create a valid ID
-        const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
-        let output = `<h3>Round ${round} (${position})</h3><div><canvas id="chart${positionId}Round${round}" width="400" height="400"></canvas></div><table>`;
+        // const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
+        // let output = `<h3>Round ${round} (${position})</h3><div><canvas id="chart${positionId}Round${round}" width="400" height="400"></canvas></div><table>`;
+        let output = `<h3>${position}</h3>`;
+        output += `<tr><th>Round</th><th>Candidate</th><th>Votes</th><th>Percentage</th><th>Eliminated Candidates</th></tr>`;
         output += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
 
         sortedVotes.forEach(([candidate, votes]) => {
           const percentage = ((votes / totalVotes) * 100).toFixed(2);
-          output += `<tr><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td></tr>`;
+          output += `<tr><td>${round}</td><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td><td>${eliminatedThisRound.join(
+            ", "
+          )}</td></tr>`;
         });
 
         output += `</table>`;
+        // sortedVotes.forEach(([candidate, votes]) => {
+        //   const percentage = ((votes / totalVotes) * 100).toFixed(2);
+        //   output += `<tr><td>${round}</td><td>${candidate}</td><td>${votes}</td><td>${percentage}%</td><td>${eliminatedThisRound.join(
+        //     ", "
+        //   )}</td></tr>`;
+        // });
 
-        if (eliminatedThisRound.length > 0) {
-          output += `<p><b>Eliminated this round:</b>  ${eliminatedThisRound.join(
-            ", "
-          )}</p>`;
-        }
-        if (allEliminatedCandidates.size > 0) {
-          output += `<p><b>Eliminated candidates so far:</b> ${Array.from(
-            allEliminatedCandidates
-          ).join(", ")}</p>`;
-        }
+        // output += `</table>`;
 
-        setTimeout(
-          () =>
-            renderChart(
-              `chart${positionId}Round${round}`,
-              sortedVotes,
-              totalVotes,
-              position
-            ),
-          0
-        );
+        // if (eliminatedThisRound.length > 0) {
+        //   output += `<p><b>Eliminated this round:</b>  ${eliminatedThisRound.join(
+        //     ", "
+        //   )}</p>`;
+        // }
+        // if (allEliminatedCandidates.size > 0) {
+        //   output += `<p><b>Eliminated candidates so far:</b> ${Array.from(
+        //     allEliminatedCandidates
+        //   ).join(", ")}</p>`;
+        // }
+
+        // setTimeout(
+        //   () =>
+        //     renderChart(
+        //       `chart${positionId}Round${round}`,
+        //       sortedVotes,
+        //       totalVotes,
+        //       position
+        //     ),
+        //   0
+        // );
 
         return output;
       }

@@ -181,7 +181,7 @@ function initializePositionDropdown(uniquePositions) {
 
 function processPositions(positions, lines, uniquePositions) {
   // let output = "Results by Position";
-  let output = "<h1>Results by Pound</h1>";
+  let output = "<h1>Results by Position</h1>";
   let roundResults = {};
 
   uniquePositions.forEach((position) => {
