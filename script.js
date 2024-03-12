@@ -407,15 +407,22 @@ function renderChart(canvasId, sortedVotes, totalVotes, position) {
 }
 
 function declareWinner(sortedVotes, totalVotes, position) {
-  // Check if there's a tie between the last two candidates
-  if (
-    sortedVotes.length === 2 &&
-    sortedVotes[0][1] === sortedVotes[1][1]
-  ) {
+  const maxVotes = sortedVotes[0][1];
+  const winner = sortedVotes[0][0];
+  const winnersList = [];
+
+  sortedVotes.forEach(([candidate, votes]) => {
+    if (votes === maxVotes) {
+      winnersList.push(candidate);
+    }
+  });
+
+  if (winnersList.length > 1) {
+    winners[position] = {
+      tie: winnersList,
+    };
     return `<h4>There is a tie. Ties are resolved using a process that is determined by the Elections Administration Committee.</h4>`;
   } else {
-    const winner = sortedVotes[0][0];
-    const maxVotes = sortedVotes[0][1];
     const winnerPercentage = ((maxVotes / totalVotes) * 100).toFixed(2);
     winners[position] = {
       name: winner,
@@ -425,7 +432,6 @@ function declareWinner(sortedVotes, totalVotes, position) {
     return `<h4>Winner: ${winner} with ${maxVotes} votes (${winnerPercentage}% of total votes)</h4>`;
   }
 }
-
 function updateEliminatedCandidates(
   sortedVotes,
   eliminatedCandidates,
@@ -452,14 +458,19 @@ function updateEliminatedCandidates(
   };
 }
 
-// currently overview only shows positions with winners (doesn't show results for positions with ties)
 function updateWinnersOverview() {
   let overviewHtml = "<h2>Overview</h2><table>";
   overviewHtml +=
     "<tr><th>Position</th><th>Winner</th><th>Votes</th><th>Percentage</th></tr>";
 
   for (const position in winners) {
-    overviewHtml += `<tr><td>${position}</td><td>${winners[position].name}</td><td>${winners[position].votes}</td><td>${winners[position].percentage}%</td></tr>`;
+    if (winners[position].tie) {
+      overviewHtml += `<tr><td>${position} (Tie)</td><td colspan="3">${winners[
+        position
+      ].tie.join(", ")}</td></tr>`;
+    } else {
+      overviewHtml += `<tr><td>${position}</td><td>${winners[position].name}</td><td>${winners[position].votes}</td><td>${winners[position].percentage}%</td></tr>`;
+    }
   }
 
   overviewHtml += "</table>";
