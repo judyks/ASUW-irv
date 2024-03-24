@@ -49,20 +49,34 @@ function handleFileSelect(event, fileNameElement, processButton) {
   reader.onload = async (event) => {
     globalCsvData = event.target.result;
     globalCsvDataProto = await Papa.parse(globalCsvData, { header: true });
+
+    const positions = [...new Set(extractPositionsFromHeaders(globalCsvDataProto.meta.fields))].filter(isAllowedPosition);
+    let positionsInfo = positions.length ? `<b>Positions:</b><br> ${positions.join('<br>')}<br>` : `<div class='warning'>Warning: No position found in csv, please check your input.<div>`;
+
+    const headers = globalCsvDataProto.meta.fields.filter(field => positions.some((position) => field.trim().startsWith(position)));
+    const candidates = [...new Set(globalCsvDataProto.data.flatMap((data) => {
+      let candidates = [];
+      for (let header of headers) { candidates.push(data[header]?.trim()); }
+      return candidates;
+    }))].filter((candidate) => candidate).sort();
+    let candidatesInfo = candidates.length ? `<b>Candidates:</b><br> ${candidates.join('<br>')}<br>` : `<div class='warning'>Warning: No candidate found in csv, please check your input.<div>`;
+
+    document.getElementById('pre-check').innerHTML = [positionsInfo, candidatesInfo].join('<br>');
     processButton.disabled = false;
   };
   reader.readAsText(file);
   fileNameElement.innerHTML = file ? `<b>${file.name}</b>` : "<b>No file selected</b>";
 }
 
+function isAllowedPosition(position) {
+  return globalPositionName.some((header) =>
+    position.toLowerCase().startsWith(header.toLowerCase())
+  );
+}
+
 function onProcessButtonClick() {
   if (!globalCsvDataProto) return;
 
-  function isAllowedPosition(position) {
-    return globalPositionName.some((header) =>
-      position.toLowerCase().startsWith(header.toLowerCase())
-    );
-  }
   const positions = [...new Set(extractPositionsFromHeaders(globalCsvDataProto.meta.fields))].filter(isAllowedPosition);
 
   processEntry(positions, globalCsvDataProto);
@@ -71,7 +85,7 @@ function onProcessButtonClick() {
 
   document.getElementById("toggleOverviewButton").style.display = "block";
   document.getElementById("resultsByRoundOrPositionButton").style.display = "block";
-  document.getElementById("voterStatsButton").style.display = "block";
+  // document.getElementById("voterStatsButton").style.display = "block";
 
   document.getElementById("positionResultsContainer").style.display = "block";
   document.getElementById("roundResultsContainer").style.display = "none";
@@ -161,7 +175,7 @@ function processEntry(positions, csvDataProto) {
       htmlByRound[roundIndex].push(`<h4>Position: ${position}</h4>${roundResult}`);
     });
   }
-  let htmlOfRounds = "<h1>Results by round</h1>";
+  let htmlOfRounds = "<h1>Results by Round</h1>";
   for (const round in htmlByRound) {
     htmlOfRounds += `<h2 id="round-${parseInt(round) + 1}">ROUND ${parseInt(round) + 1}</h2>`
       + htmlByRound[round].join("") + `<div class="position-separator"></div>`;
@@ -259,14 +273,7 @@ function sortVotes(voteCounts) {
 }
 
 
-function generatePositionRoundUnit(
-  position,
-  round,
-  sortedVotes,
-  totalVotes,
-  eliminatedThisRound,
-  allEliminatedCandidates
-) {
+function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eliminatedThisRound, allEliminatedCandidates) {
   // Using a sanitized version of the position name to create a valid ID
   const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
   let canvasId = `canvas-chart-position-${positionId}-round-${round}`;
@@ -282,16 +289,12 @@ function generatePositionRoundUnit(
   });
 
   outputHtml += `</table>`;
-
   if (eliminatedThisRound.length > 0) {
     outputHtml += `<p><b>Eliminated this round:</b> ${eliminatedThisRound.join(", ")}</p>`;
   }
   if (allEliminatedCandidates.size > 0) {
-    outputHtml += `<p><b>Eliminated candidates so far:</b> ${Array.from(
-      allEliminatedCandidates
-    ).join(", ")}</p>`;
+    outputHtml += `<p><b>Eliminated candidates so far:</b> ${Array.from(allEliminatedCandidates).join(", ")}</p>`;
   }
-
   return outputHtml;
 }
 
@@ -348,9 +351,7 @@ function declareWinner(sortedVotes, totalVotes, position) {
   const winner = sortedVotes[0][0];
   const winnersList = [];
 
-  sortedVotes.forEach(([candidate, votes]) => {
-    if (votes == maxVotes) { winnersList.push(candidate); }
-  });
+  sortedVotes.forEach(([candidate, votes]) => { if (votes == maxVotes) { winnersList.push(candidate); } });
 
   if (winnersList.length > 1) {
     winners[position] = { tie: winnersList, };

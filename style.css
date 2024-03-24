@@ -201,3 +201,6 @@ button:hover {
 canvas[id^="canvas-"] {
     height: 300px !important;
 }
+.warning{
+    color: red;
+}
