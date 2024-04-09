@@ -26,6 +26,7 @@ function initialize() {
   const resultsByRoundOrPositionButton = document.getElementById("resultsByRoundOrPositionButton");
   const toggleBallotMeasureButton = document.getElementById("toggleBallotMeasureButton");
   const toggleOverviewButton = document.getElementById("toggleOverviewButton");
+  const voterStatsButton = document.getElementById("voterStatsButton");
 
 
   fileInput.addEventListener("change", (event) => handleFileSelect(event, fileNameElement, processButton));
@@ -36,7 +37,7 @@ function initialize() {
   resultsByRoundOrPositionButton.addEventListener("click", toggleResultsByRoundOrPosition);
   toggleBallotMeasureButton.addEventListener("click", toggleBallotMeasure);
   toggleOverviewButton.addEventListener("click", toggleOverview);
-
+  voterStatsButton.addEventListener("click", showVoterStats);
 }
 
 
@@ -137,7 +138,7 @@ function onProcessButtonClick() {
   document.getElementById("toggleOverviewButton").style.display = "block";
 
   document.getElementById("resultsByRoundOrPositionButton").style.display = "block";
-  // document.getElementById("voterStatsButton").style.display = "block";
+  //document.getElementById("voterStatsButton").style.display = "block";
 
   document.getElementById("positionResultsContainer").style.display = "block";
   document.getElementById("roundResultsContainer").style.display = "none";
@@ -263,7 +264,6 @@ function extractPositionsFromHeaders(headers) {
 
 
 function processEntry(positions, csvDataProto) {
-  // Update the globalCsvDataProto based on the merged candidates
   updateGlobalCsvDataProtoForMergedCandidates();
 
   let htmlByRound = {};
@@ -513,3 +513,94 @@ function updateEliminatedCandidates(sortedVotes, eliminatedCandidates,) {
   };
 }
 
+function generateLivingCommunityChart() {
+  const livingCommunityVotes = {};
+  globalCsvDataProto.data.forEach(row => {
+    const community = row['Please select your living community:'].trim();
+    livingCommunityVotes[community] = (livingCommunityVotes[community] || 0) + 1;
+  });
+
+  const ctx = document.getElementById('livingCommunityChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(livingCommunityVotes),
+      datasets: [{
+        data: Object.values(livingCommunityVotes),
+        backgroundColor: generateColorArray(Object.keys(livingCommunityVotes).length),
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: 'Living Community Votes'
+      }
+    }
+  });
+}
+
+function generateClassStandingChart() {
+  const classStandingVotes = {};
+  globalCsvDataProto.data.forEach(row => {
+    const standing = row['Please list your class standing:'].trim();
+    classStandingVotes[standing] = (classStandingVotes[standing] || 0) + 1;
+  });
+
+  const ctx = document.getElementById('classStandingChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(classStandingVotes),
+      datasets: [{
+        data: Object.values(classStandingVotes),
+        backgroundColor: generateColorArray(Object.keys(classStandingVotes).length),
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: 'Class Standing Votes'
+      }
+    }
+  });
+}
+
+function generateColorArray(numColors) {
+  const colors = [];
+  for (let i = 0; i < numColors; i++) {
+    colors.push(`hsl(${(i / numColors) * 360}, 70%, 70%)`);
+  }
+  return colors;
+}
+
+function showVoterStats() {
+  document.getElementById("uploadFileSection").style.display = "none";
+  document.getElementById("positionResultsContainer").style.display = "none";
+  document.getElementById("roundResultsContainer").style.display = "none";
+  document.getElementById("winnersOverview").style.display = "none";
+
+  const voterStatsSection = document.getElementById("voterStatsSection");
+  voterStatsSection.style.display = "block";
+
+  voterStatsSection.innerHTML = `
+    <div>
+      <h2>Living Community Votes</h2>
+      <div style="width:300px; height:300px;">
+      <canvas id="livingCommunityChart"></canvas>
+      </div>
+    </div>
+    <div>
+      <h2>Class Standing Votes</h2>
+      <div style="width:300px; height:300px;">
+        <canvas id="classStandingChart"></canvas>
+      </div>
+    </div>
+  `;
+
+  generateLivingCommunityChart();
+  generateClassStandingChart();
+}
