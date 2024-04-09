@@ -51,11 +51,8 @@ h3 {
     border-radius: 20px;
     border: 1px solid #cccccc;
     padding: 10px 20px;
-    /* Add padding for better spacing */
     display: inline-block;
-    /* Ensure the border wraps around the content */
     background-color: #f9f9f9;
-    /* Add background color for better contrast */
 }
 
 #positionDropdown,
@@ -204,4 +201,31 @@ canvas[id^="canvas-"] {
 }
 .warning{
     color: red;
+    font-weight: bold;
 }
+
+.chart-table-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.chart-table-container > div {
+    flex: 1;
+}
+
+.table-info-container {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  
+
+.voter-stats-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+  }
+  
