@@ -1,3 +1,4 @@
+<!-- IGNORE FILE -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -712,15 +713,99 @@
         document.getElementById("winnersOverview").innerHTML = overviewHtml;
       }
 
+      // function displayRoundResults(roundResults) {
+      //   let roundResultsOutput = "<h1>Results by round</h1>";
+      //   Object.keys(roundResults).forEach((round) => {
+      //     roundResultsOutput +=
+      //       `<h2>ROUND ${parseInt(round) + 1}</h2>` +
+      //       roundResults[round].join("");
+      //   });
+      //   document.getElementById("roundResultsContainer").innerHTML =
+      //     roundResultsOutput;
+      // }
       function displayRoundResults(roundResults) {
         let roundResultsOutput = "<h1>Results by round</h1>";
         Object.keys(roundResults).forEach((round) => {
           roundResultsOutput +=
-            `<h2>ROUND ${parseInt(round) + 1}</h2>` +
+            `<h2>Round ${parseInt(round) + 1}</h2>` +
             roundResults[round].join("");
+
+          // For each round, extract the data and render the bar chart
+          roundResults[round].forEach((result, positionIndex) => {
+            const positionId = `Position${positionIndex}Round${round}`;
+            const canvasId = `barChart${positionId}`;
+
+            // Inserting canvas dynamically for each round result
+            roundResultsOutput += `<div><canvas id="${canvasId}" width="200" height="200"></canvas></div>`;
+
+            // Prepare data for the bar chart
+            const data = extractChartDataFromResult(result);
+
+            // Render the bar chart after the output is added to the DOM
+            setTimeout(() => renderBarChart(canvasId, data), 0);
+          });
         });
+
         document.getElementById("roundResultsContainer").innerHTML =
           roundResultsOutput;
+      }
+
+      function extractChartDataFromResult(result) {
+        // Initialize arrays to hold the labels (candidate names) and data (vote counts)
+        const labels = [];
+        const data = [];
+
+        // Split the result content by rows in the table
+        const rows = result.split("<tr>");
+
+        // Iterate over each row to extract candidate names and vote counts
+        rows.forEach((row, index) => {
+          // Skip the header row and any empty rows
+          if (index !== 0 && row.trim() !== "") {
+            // Split the row content by table data tags to get the columns
+            const columns = row
+              .split("</td>")
+              .map((td) => td.substring(td.lastIndexOf("<td>") + 4));
+
+            // The candidate name is expected to be in the first column (after the header)
+            // The vote count is expected to be in the second column
+            if (columns.length >= 2) {
+              labels.push(columns[0].trim()); // Add the candidate name to the labels array
+              data.push(parseInt(columns[1].trim())); // Parse and add the vote count to the data array
+            }
+          }
+        });
+
+        // Return the extracted data as an object with labels and datasets for the chart
+        return {
+          labels: labels,
+          datasets: [
+            {
+              label: "Votes",
+              data: data,
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        };
+      }
+
+      function renderBarChart(canvasId, chartData) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+        ctx.canvas.width = 400;
+        ctx.canvas.height = 400;
+        new Chart(ctx, {
+          type: "bar",
+          data: chartData,
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
       }
     </script>
   </body>

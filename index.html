@@ -4,182 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ASUW IRV Elections</title>
-    <style>
-      body {
-        background-color: #f4f7fa;
-        margin: 0;
-        padding: 40px;
-        font-family: "Encode Sans", sans-serif;
-        color: #333;
-      }
-      .title {
-        text-align: center;
-        font-size: 2.5em;
-        color: #333;
-        margin-bottom: 0.5em;
-      }
-      table {
-        border-collapse: collapse;
-        width: 50%;
-        margin: 30px auto;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        text-align: left;
-        padding: 12px;
-        font-size: 14px;
-      }
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
-      th {
-        background-color: #8d8c8e;
-        color: white;
-      }
-      h2 {
-        text-align: center;
-        font-size: 1.2em;
-        color: #333;
-        margin: 20px 0;
-      }
-      h3 {
-        font-size: 1em;
-        color: #333333d0;
-        margin-top: 20px;
-        border-radius: 20px;
-        border: 1px solid #cccccc;
-        padding: 10px 20px; /* Add padding for better spacing */
-        display: inline-block; /* Ensure the border wraps around the content */
-        background-color: #f9f9f9; /* Add background color for better contrast */
-      }
-
-      #positionDropdown,
-      select {
-        padding: 10px;
-        border-radius: 20px;
-        border: 1px solid #cccccc;
-        background-color: #ffffff;
-        margin: 20px 10px;
-        display: block;
-        width: 25%;
-        appearance: none;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%234b2e83" d="M7 10l5 5 5-5z"/></svg>'); /* dropdown arrow */
-        background-repeat: no-repeat;
-        background-position: right 10px top 50%;
-      }
-      .drop-zone {
-        border: 2px dashed #86838a7e;
-        border-radius: 12px;
-        padding: 30px;
-        text-align: center;
-        background-color: #fff;
-        cursor: pointer;
-        margin: 20px auto;
-        width: 80%;
-        transition: all 0.3s;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 200px;
-      }
-      .drop-zone:hover,
-      .drop-zone.dragover {
-        background-color: #d8d6db42;
-        border-color: #86838aa9;
-      }
-      .drop-zone p {
-        font-size: 1rem;
-        color: #333;
-      }
-      .drop-zone .browse-button {
-        background-color: #858389;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 30px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        font-weight: bold;
-        margin-top: 15px;
-      }
-      .drop-zone .browse-button:hover {
-        background-color: #c5b4e3;
-      }
-      .buttons-container {
-        text-align: center;
-        display: flex;
-        justify-content: center;
-      }
-      button {
-        background-color: #e2e1e4;
-        color: #333;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 20px;
-        cursor: pointer;
-        display: inline-block;
-        margin: 20px 10px;
-        transition: all 0.3s;
-        font-weight: bold;
-      }
-      button:hover {
-        background-color: #87858aa4;
-        color: white;
-        transform: translateY(-2px);
-      }
-      #fileName {
-        font-size: 1rem;
-        color: #333;
-        margin-top: 20px;
-      }
-      #output,
-      #winnersOverview,
-      #roundResultsContainer {
-        margin-top: 50px;
-        text-align: center;
-      }
-      #winnersOverview {
-        margin-bottom: 80px;
-      }
-      .position-separator {
-        border-top: 2px solid #ddd;
-        width: 80%;
-        margin: 50px auto;
-      }
-      .outer-box {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 50%;
-        margin: 30px auto;
-        text-align: center;
-      }
-      .file-icon-container {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: #d4d3d5ab;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 2px transparent #fff;
-        margin-bottom: 20px;
-      }
-
-      .file-icon {
-        font-size: 3rem;
-        color: #fff;
-      }
-
-      .logo img {
-        max-width: 150px;
-        height: auto;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
 
   <body>
@@ -193,7 +18,7 @@
     </header>
     <main>
       <section>
-        <div id="uploadFileContainer" class="outer-box">
+        <div id="uploadFileSection" class="outer-box">
           <div id="dropZone" class="drop-zone">
             <div class="file-icon-container">
               <span class="file-icon">⬆</span>
@@ -208,25 +33,29 @@
               style="display: none"
             />
           </div>
+          <div id="pre-check"></div>
           <button id="processButton" disabled>Process IRV</button>
         </div>
         <div class="buttons-container">
           <button id="toggleOverviewButton" style="display: none">
             Overview
           </button>
-          <button id="resultsByRoundButton" style="display: none">
+          <button id="resultsByRoundOrPositionButton" style="display: none">
             Results by Round
           </button>
           <button id="voterStatsButton" style="display: none">
             Voter Statistics
           </button>
           <select id="positionDropdown" style="display: none"></select>
+          <select id="roundDropdown" style="display: none"></select>
         </div>
         <section id="winnersOverview"></section>
-        <div id="output"></div>
+        <div id="positionResultsContainer" style="display: none"></div>
         <div id="roundResultsContainer" style="display: none"></div>
       </section>
     </main>
+    <!-- for parsing csv -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <!-- for pie charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
