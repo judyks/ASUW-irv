@@ -24,7 +24,10 @@ function initialize() {
   const positionDropdown = document.getElementById("positionDropdown");
   const roundDropdown = document.getElementById("roundDropdown");
   const resultsByRoundOrPositionButton = document.getElementById("resultsByRoundOrPositionButton");
+  const toggleBallotMeasureButton = document.getElementById("toggleBallotMeasureButton");
   const toggleOverviewButton = document.getElementById("toggleOverviewButton");
+  const voterStatsButton = document.getElementById("voterStatsButton");
+
 
   fileInput.addEventListener("change", (event) => handleFileSelect(event, fileNameElement, processButton));
   setupDropZoneEvents(dropZone, fileInput, fileNameElement);
@@ -32,7 +35,9 @@ function initialize() {
   positionDropdown.addEventListener("change", (event) => scrollToSegment(event));
   roundDropdown.addEventListener("change", (event) => scrollToSegment(event));
   resultsByRoundOrPositionButton.addEventListener("click", toggleResultsByRoundOrPosition);
+  toggleBallotMeasureButton.addEventListener("click", toggleBallotMeasure);
   toggleOverviewButton.addEventListener("click", toggleOverview);
+  voterStatsButton.addEventListener("click", showVoterStats);
 }
 
 
@@ -128,8 +133,10 @@ function onProcessButtonClick() {
   processEntry(positions, globalCsvDataProto);
 
   document.getElementById("uploadFileSection").style.display = "none";
-
+  
+  document.getElementById("toggleBallotMeasureButton").style.display = "block";
   document.getElementById("toggleOverviewButton").style.display = "block";
+
   document.getElementById("resultsByRoundOrPositionButton").style.display = "block";
   document.getElementById("voterStatsButton").style.display = "block";
 
@@ -149,6 +156,55 @@ function toggleOverview() {
       overviewSection.style.display == "" ? "block" : "none";
   document.getElementById("toggleOverviewButton").textContent =
     overviewSection.style.display == "block" ? "Hide Overview" : "Show Overview";
+}
+
+function toggleBallotMeasure() {
+  const ballotMeasureSection = document.getElementById("ballotMeasureSection");
+  
+  // Toggle display of the ballot measure section
+  ballotMeasureSection.style.display = ballotMeasureSection.style.display === "none" ? "block" : "none";
+  document.getElementById("toggleBallotMeasureButton").textContent = ballotMeasureSection.style.display === "block" ? "Hide Ballot Measure" : "Show Ballot Measure";
+  
+  // Ensure content is generated and chart is rendered only when the section is visible
+  if (ballotMeasureSection.style.display === "block" && globalCsvDataProto) {
+    ballotMeasureSection.innerHTML = `
+      <h1>Ballot Measure</h1>
+      <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
+      <h3>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h3>
+      <p id="ballotMeasureResult"></p>
+      <div style="width:300px; height:300px;">
+        <canvas id="ballotMeasureChart"></canvas>
+      </div>
+    `;
+
+    const ballotHeader = globalCsvDataProto.meta.fields.find(field => field.startsWith("Do you approve the 2024 ASUW Proposal Constitution"));
+    if (ballotHeader) {
+      const yesVotes = globalCsvDataProto.data.filter(row => row[ballotHeader]?.trim().toLowerCase() === 'yes').length;
+      const noVotes = globalCsvDataProto.data.filter(row => row[ballotHeader]?.trim().toLowerCase() === 'no').length;
+
+      document.getElementById("ballotMeasureResult").textContent = yesVotes > noVotes ? "Ballot Measure Passed" : "Ballot Measure Failed";
+
+      const ctx = document.getElementById("ballotMeasureChart").getContext('2d');
+      const ballotChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Yes', 'No'],
+          datasets: [{
+            data: [yesVotes, noVotes],
+            backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
+            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+    } else {
+      console.error('Ballot measure question not found in the data');
+    }
+  }
 }
 
 function toggleResultsByRoundOrPosition() {
@@ -208,7 +264,6 @@ function extractPositionsFromHeaders(headers) {
 
 
 function processEntry(positions, csvDataProto) {
-  // Update the globalCsvDataProto based on the merged candidates
   updateGlobalCsvDataProtoForMergedCandidates();
 
   let htmlByRound = {};
@@ -419,7 +474,6 @@ function renderChart(canvasId, sortedVotes) {
   });
 }
 
-
 function declareWinner(sortedVotes, totalVotes, position) {
   const maxVotes = sortedVotes[0][1];
   const winner = sortedVotes[0][0];
@@ -459,3 +513,94 @@ function updateEliminatedCandidates(sortedVotes, eliminatedCandidates,) {
   };
 }
 
+function generateLivingCommunityChart() {
+  const livingCommunityVotes = {};
+  globalCsvDataProto.data.forEach(row => {
+    const community = row['Please select your living community:'].trim();
+    livingCommunityVotes[community] = (livingCommunityVotes[community] || 0) + 1;
+  });
+
+  const ctx = document.getElementById('livingCommunityChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(livingCommunityVotes),
+      datasets: [{
+        data: Object.values(livingCommunityVotes),
+        backgroundColor: generateColorArray(Object.keys(livingCommunityVotes).length),
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: 'Living Community Votes'
+      }
+    }
+  });
+}
+
+function generateClassStandingChart() {
+  const classStandingVotes = {};
+  globalCsvDataProto.data.forEach(row => {
+    const standing = row['Please list your class standing:'].trim();
+    classStandingVotes[standing] = (classStandingVotes[standing] || 0) + 1;
+  });
+
+  const ctx = document.getElementById('classStandingChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(classStandingVotes),
+      datasets: [{
+        data: Object.values(classStandingVotes),
+        backgroundColor: generateColorArray(Object.keys(classStandingVotes).length),
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: 'Class Standing Votes'
+      }
+    }
+  });
+}
+
+function generateColorArray(numColors) {
+  const colors = [];
+  for (let i = 0; i < numColors; i++) {
+    colors.push(`hsl(${(i / numColors) * 360}, 70%, 70%)`);
+  }
+  return colors;
+}
+
+function showVoterStats() {
+  document.getElementById("uploadFileSection").style.display = "none";
+  document.getElementById("positionResultsContainer").style.display = "none";
+  document.getElementById("roundResultsContainer").style.display = "none";
+  document.getElementById("winnersOverview").style.display = "none";
+
+  const voterStatsSection = document.getElementById("voterStatsSection");
+  voterStatsSection.style.display = "block";
+
+  voterStatsSection.innerHTML = `
+    <div>
+      <h2>Living Community Votes</h2>
+      <div style="width:300px; height:300px;">
+      <canvas id="livingCommunityChart"></canvas>
+      </div>
+    </div>
+    <div>
+      <h2>Class Standing Votes</h2>
+      <div style="width:300px; height:300px;">
+        <canvas id="classStandingChart"></canvas>
+      </div>
+    </div>
+  `;
+
+  generateLivingCommunityChart();
+  generateClassStandingChart();
+}

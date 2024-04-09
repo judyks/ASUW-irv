@@ -151,7 +151,8 @@ button:hover {
 
 #winnersOverview,
 #positionResultsContainer,
-#roundResultsContainer {
+#roundResultsContainer,
+#ballotMeasureSection {
     margin-top: 50px;
     text-align: center;
 }
@@ -382,3 +383,5 @@ body {
     max-width: 150px;
     height: auto;
   }
+
+  

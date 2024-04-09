@@ -9,12 +9,10 @@
 
   <body>
     <header>
-      <header class="header">
-        <div class="logo">
-          <img src="images/logo.png" alt="ASUW Logo" />
-        </div>
-        <h1 class="title">ASUW IRV Elections</h1>
-      </header>
+      <div class="logo">
+        <img src="images/logo.png" alt="ASUW Logo" />
+      </div>
+      <h1 class="title">ASUW IRV Elections</h1>
     </header>
     <main>
       <section>
@@ -37,6 +35,9 @@
           <button id="processButton" disabled>Process IRV</button>
         </div>
         <div class="buttons-container">
+          <button id="toggleBallotMeasureButton" style="display: none">
+            Ballot Measure
+          </button>
           <button id="toggleOverviewButton" style="display: none">
             Overview
           </button>
@@ -50,8 +51,10 @@
           <select id="roundDropdown" style="display: none"></select>
         </div>
         <section id="winnersOverview"></section>
+        <section id="ballotMeasureSection"></section>
         <div id="positionResultsContainer" style="display: none"></div>
         <div id="roundResultsContainer" style="display: none"></div>
+        <div id="voterStatsSection" style="display: none"></div>
       </section>
     </main>
     <!-- for parsing csv -->
