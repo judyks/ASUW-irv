@@ -171,7 +171,7 @@ function toggleBallotMeasure() {
       <h1>Ballot Measure</h1>
       <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
       <h3>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h3>
-      <p id="ballotMeasureResult"></p>
+      <h2 id="ballotMeasureResult"></h2>
       <div style="width:300px; height:300px;">
         <canvas id="ballotMeasureChart"></canvas>
       </div>
