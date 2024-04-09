@@ -131,7 +131,7 @@ function onProcessButtonClick() {
 
   document.getElementById("toggleOverviewButton").style.display = "block";
   document.getElementById("resultsByRoundOrPositionButton").style.display = "block";
-  document.getElementById("voterStatsButton").style.display = "block";
+  // document.getElementById("voterStatsButton").style.display = "block";
 
   document.getElementById("positionResultsContainer").style.display = "block";
   document.getElementById("roundResultsContainer").style.display = "none";
@@ -418,7 +418,6 @@ function renderChart(canvasId, sortedVotes) {
     },
   });
 }
-
 
 function declareWinner(sortedVotes, totalVotes, position) {
   const maxVotes = sortedVotes[0][1];
