@@ -1,7 +1,7 @@
 body {
     background-color: #f4f7fa;
     margin: 0;
-    padding: 40px;
+    padding: 100px;
     font-family: "Encode Sans", sans-serif;
     color: #333;
 }
@@ -227,5 +227,46 @@ canvas[id^="canvas-"] {
     display: flex;
     justify-content: space-around;
     align-items: flex-start;
+  }
+  
+
+.center-text {
+    margin-top: 50px;
+    text-align: center;
+  }
+  
+.left-aligned-list {
+    text-align: left;
+    display: inline-block;
+    margin-top: 30px;
+    margin-bottom: 40px;
+} 
+
+.ballot-measure-container {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    padding: 30px; 
+    padding-bottom: 100px; 
+    margin-top: 30px; 
+  }
+  
+  .ballot-measure-text {
+    flex: 1;
+    margin-right: 10px; /* Adjust the spacing as needed */
+    margin-left: 60px;
+    text-align: left;
+  }
+  
+  .ballot-measure-chart {
+    flex: 1;
+  }
+  
+  .graph-container {
+    margin-bottom: 20px; /* Space between graphs */
+    width: 300px; /* Adjust width as needed */
+    height: 300px; /* Adjust height as needed */
   }
   

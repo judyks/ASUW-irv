@@ -40,6 +40,7 @@ function initialize() {
   voterStatsButton.addEventListener("click", showVoterStats);
 }
 
+
 function handleFileSelect(event, fileNameElement, processButton) {
   const file = event.target.files[0];
   if (!file) return;
@@ -59,8 +60,8 @@ function handleFileSelect(event, fileNameElement, processButton) {
     const positions = [...new Set(extractPositionsFromHeaders(globalCsvDataProto.meta.fields))]
                         .filter(isAllowedPosition);
     let positionsInfo = positions.length 
-                        ? `<b>Positions:</b><br> ${positions.map(position => `- ${position}`).join('<br>')}<br>` 
-                        : `<div class='warning'>Warning: No position found in csv, please check your input.</div>`;
+                        ? `<div class="center-text"><b>Positions:</b><br><div class="left-aligned-list">${positions.map(position => `&bull; ${position}`).join('<br>')}<br></div></div>` 
+                        : `<div class='warning center-text'>Warning: No position found in csv, please check your input.</div>`;
 
     const headers = globalCsvDataProto.meta.fields.filter(field => positions.some((position) => field.trim().startsWith(position)));
     const candidates = [...new Set(globalCsvDataProto.data.flatMap((data) => {
@@ -92,6 +93,7 @@ function handleFileSelect(event, fileNameElement, processButton) {
   reader.readAsText(file);
   fileNameElement.innerHTML = file ? `<b>${file.name}</b>` : "<b>No file selected</b>";
 }
+
 
 
 function mergeCandidates() {
@@ -168,12 +170,16 @@ function toggleBallotMeasure() {
   // Ensure content is generated and chart is rendered only when the section is visible
   if (ballotMeasureSection.style.display === "block" && globalCsvDataProto) {
     ballotMeasureSection.innerHTML = `
-      <h1>Ballot Measure</h1>
-      <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
-      <h3>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h3>
-      <h2 id="ballotMeasureResult"></h2>
-      <div style="width:300px; height:300px;">
-        <canvas id="ballotMeasureChart"></canvas>
+      <div class="ballot-measure-container">
+          <div class="ballot-measure-text">
+          <h1>Ballot Measure</h1>
+          <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
+          <h4>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h4>
+        </div>
+        <div class="ballot-measure-chart" style="width:300px; height:300px;">
+          <canvas id="ballotMeasureChart"></canvas>
+          <h3 id="ballotMeasureResult"></h3>
+        </div>
       </div>
     `;
 
@@ -400,8 +406,10 @@ function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eli
   let canvasId = `canvas-chart-position-${positionId}-round-${round}`;
 
   let outputHtml = `<div class="chart-table-container">`;
-  outputHtml += `<div><canvas id="${canvasId}" width="400" height="400" position="${positionId}" round="${round}" sortedVotes="${btoa(JSON.stringify(sortedVotes))}"></canvas></div>`;
-  outputHtml += `<div><table>`;
+  // Including the position name in the table-text-container
+  outputHtml += `<div class="table-text-container">`;
+  outputHtml += `<h3>${position}</h3>`; // Display the position name
+  outputHtml += `<table>`;
   outputHtml += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
 
   sortedVotes.forEach(([candidate, votes]) => {
@@ -418,10 +426,12 @@ function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eli
     outputHtml += `<p><b>Eliminated candidates so far:</b> ${Array.from(allEliminatedCandidates).join(", ")}</p>`;
   }
 
-  const winnerInfo = declareWinner(sortedVotes, totalVotes, position);
-  outputHtml += winnerInfo;
+  outputHtml += `</div>`; // Close table-text-container div
 
-  outputHtml += `</div></div>`;
+  // Chart container remains the same
+  outputHtml += `<div class="chart-container"><canvas id="${canvasId}" width="400" height="400" position="${positionId}" round="${round}" sortedVotes="${btoa(JSON.stringify(sortedVotes))}"></canvas></div>`;
+
+  outputHtml += `</div>`; // Close chart-table-container div
 
   return outputHtml;
 }
