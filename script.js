@@ -35,6 +35,7 @@ function initialize() {
   toggleOverviewButton.addEventListener("click", toggleOverview);
 }
 
+
 function handleFileSelect(event, fileNameElement, processButton) {
   const file = event.target.files[0];
   if (!file) return;
@@ -68,22 +69,50 @@ function handleFileSelect(event, fileNameElement, processButton) {
     // Building a table for candidates with checkboxes
     let candidatesInfo = "<b>Candidates:</b>";
     if (candidates.length) {
-      candidatesInfo += "<table><tr><th>Select</th><th>Candidate</th></tr>";
+      candidatesInfo += "<table id='candidatesTable'><tr><th>Select</th><th>Candidate</th></tr>";
       candidates.forEach((candidate, index) => {
         candidatesInfo += `<tr><td><input type="checkbox" id="candidate-${index}" name="candidate-${index}"></td><td>${candidate}</td></tr>`;
       });
       candidatesInfo += "</table>";
+      candidatesInfo += "<button id='mergeButton'>Merge Selected</button>"; // Merge button
     } else {
       candidatesInfo += `<div class='warning'>Warning: No candidate found in csv, please check your input.</div>`;
     }
 
     document.getElementById('pre-check').innerHTML = [positionsInfo, candidatesInfo].join('<br>');
     processButton.disabled = false;
+
+    document.getElementById("mergeButton").addEventListener("click", mergeCandidates); // Merge button event listener
   };
 
   reader.readAsText(file);
   fileNameElement.innerHTML = file ? `<b>${file.name}</b>` : "<b>No file selected</b>";
 }
+
+function mergeCandidates() {
+  const table = document.getElementById('candidatesTable');
+  const rows = Array.from(table.getElementsByTagName('tr'));
+  let selectedCandidates = [];
+
+  rows.forEach((row, index) => {
+    if (index > 0) { // Skipping header row
+      const checkbox = row.getElementsByTagName('input')[0];
+      if (checkbox && checkbox.checked) {
+        selectedCandidates.push(row.getElementsByTagName('td')[1].textContent);
+        row.remove(); // Remove selected rows
+      }
+    }
+  });
+
+  // Add a new row with merged candidates
+  if (selectedCandidates.length > 0) {
+    const newRow = table.insertRow();
+    const newCell = newRow.insertCell();
+    newCell.colSpan = 2;
+    newCell.innerHTML = selectedCandidates.join(', ');
+  }
+}
+
 
 function isAllowedPosition(position) {
   return globalPositionName.some((header) =>
@@ -168,8 +197,6 @@ function setupDropZoneEvents(dropZone, fileInput, fileNameElement) {
 }
 
 
-
-
 function extractPositionsFromHeaders(headers) {
   return headers.map((header) => {
     // Use a regular expression to match either "presidential" or "choice" from headers.
@@ -179,7 +206,11 @@ function extractPositionsFromHeaders(headers) {
   });
 }
 
+
 function processEntry(positions, csvDataProto) {
+  // Update the globalCsvDataProto based on the merged candidates
+  updateGlobalCsvDataProtoForMergedCandidates();
+
   let htmlByRound = {};
   let htmlOfPositions = "<h1>Results by Position</h1>";
   for (const position of positions) {
@@ -211,7 +242,6 @@ function processEntry(positions, csvDataProto) {
   document.getElementById("roundResultsContainer").innerHTML = htmlOfRounds.replaceAll("canvas-chart-", "canvas-chart-by-round-");
   document.getElementById("winnersOverview").innerHTML = winnersOverviewHtml;
 
-
   document.getElementById("positionDropdown").style.display = "block";
   document.getElementById("positionDropdown").innerHTML = '<option value="">Select position</option>' +
     positions.map((position) => `<option value="${position}">${position}</option>`).join("");
@@ -221,6 +251,27 @@ function processEntry(positions, csvDataProto) {
     Object.keys(htmlByRound).map((round) => `<option value="round-${parseInt(round) + 1}">ROUND ${parseInt(round) + 1}</option>`).join("");
 
   setTimeout(() => renderAllCharts(), 10);
+}
+
+function updateGlobalCsvDataProtoForMergedCandidates() {
+  const mergedCandidatesRow = document.querySelector('#candidatesTable tr:last-child');
+  if (!mergedCandidatesRow) return;
+
+  const mergedCandidates = mergedCandidatesRow.cells[0].textContent.split(', ').map(c => c.trim());
+  if (mergedCandidates.length <= 1) return; // No merge has been done
+
+  // Create the new merged candidate name
+  const mergedCandidateName = mergedCandidates.join(', ');
+
+  // Iterate over each vote entry to update the merged candidates
+  globalCsvDataProto.data = globalCsvDataProto.data.map(row => {
+    Object.keys(row).forEach(key => {
+      if (mergedCandidates.includes(row[key])) {
+        row[key] = mergedCandidateName; // Replace individual candidate with merged candidate name
+      }
+    });
+    return row;
+  });
 }
 
 function generateHtmlForPositionByRound(position, csvDataProto) {
