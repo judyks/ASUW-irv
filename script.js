@@ -65,12 +65,12 @@ function handleFileSelect(event, fileNameElement, processButton) {
       return candidates;
     }))].filter((candidate) => candidate).sort();
 
-    // Building a table for candidates
+    // Building a table for candidates with checkboxes
     let candidatesInfo = "<b>Candidates:</b>";
     if (candidates.length) {
-      candidatesInfo += "<table><tr><th>Candidate</th></tr>";
-      candidates.forEach((candidate) => {
-        candidatesInfo += `<tr><td>${candidate}</td></tr>`;
+      candidatesInfo += "<table><tr><th>Select</th><th>Candidate</th></tr>";
+      candidates.forEach((candidate, index) => {
+        candidatesInfo += `<tr><td><input type="checkbox" id="candidate-${index}" name="candidate-${index}"></td><td>${candidate}</td></tr>`;
       });
       candidatesInfo += "</table>";
     } else {
@@ -84,7 +84,6 @@ function handleFileSelect(event, fileNameElement, processButton) {
   reader.readAsText(file);
   fileNameElement.innerHTML = file ? `<b>${file.name}</b>` : "<b>No file selected</b>";
 }
-
 
 function isAllowedPosition(position) {
   return globalPositionName.some((header) =>
