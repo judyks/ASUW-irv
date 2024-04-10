@@ -1,7 +1,7 @@
 body {
     background-color: #f4f7fa;
     margin: 0;
-    padding: 40px;
+    padding: 100px;
     font-family: "Encode Sans", sans-serif;
     color: #333;
 }
@@ -37,11 +37,19 @@ th {
     color: white;
 }
 
+h1 {
+    padding: 40px;
+}
+
 h2 {
     text-align: center;
-    font-size: 1.2em;
-    color: #333;
+    font-size: 1.25em;
+    color: #ffffff;
     margin: 20px 0;
+    background-color: #2b2a2a;
+    padding: 10px 70px;
+    display: inline-block;
+    border-radius: 5px;
 }
 
 h3 {
@@ -51,11 +59,8 @@ h3 {
     border-radius: 20px;
     border: 1px solid #cccccc;
     padding: 10px 20px;
-    /* Add padding for better spacing */
     display: inline-block;
-    /* Ensure the border wraps around the content */
     background-color: #f9f9f9;
-    /* Add background color for better contrast */
 }
 
 #positionDropdown,
@@ -204,184 +209,71 @@ canvas[id^="canvas-"] {
 }
 .warning{
     color: red;
+    font-weight: bold;
 }
 
-body {
-    background-color: #f4f7fa;
-    margin: 0;
-    padding: 40px;
-    font-family: "Encode Sans", sans-serif;
-    color: #333;
-  }
-  .title {
-    text-align: center;
-    font-size: 2.5em;
-    color: #333;
-    margin-bottom: 0.5em;
-  }
-  table {
-    border-collapse: collapse;
-    width: 50%;
-    margin: 30px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  th,
-  td {
-    border: 1px solid #ddd;
-    text-align: left;
-    padding: 12px;
-    font-size: 14px;
-  }
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  th {
-    background-color: #8d8c8e;
-    color: white;
-  }
-  h2 {
-    text-align: center;
-    font-size: 1.2em;
-    color: #333;
-    margin: 20px 0;
-  }
-  h3 {
-    font-size: 1em;
-    color: #333333d0;
-    margin-top: 20px;
-    border-radius: 20px;
-    border: 1px solid #cccccc;
-    padding: 10px 20px; /* Add padding for better spacing */
-    display: inline-block; /* Ensure the border wraps around the content */
-    background-color: #f9f9f9; /* Add background color for better contrast */
-  }
+.chart-table-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
 
-  #positionDropdown,
-  select {
-    padding: 10px;
-    border-radius: 20px;
-    border: 1px solid #cccccc;
-    background-color: #ffffff;
-    margin: 20px 10px;
-    display: block;
-    width: 25%;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%234b2e83" d="M7 10l5 5 5-5z"/></svg>'); /* dropdown arrow */
-    background-repeat: no-repeat;
-    background-position: right 10px top 50%;
-  }
-  .drop-zone {
-    border: 2px dashed #86838a7e;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    background-color: #fff;
-    cursor: pointer;
-    margin: 20px auto;
-    width: 80%;
-    transition: all 0.3s;
+.chart-table-container > div {
+    flex: 1;
+}
+
+.table-info-container {
+    text-align: left;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
+    justify-content: flex-start;
   }
-  .drop-zone:hover,
-  .drop-zone.dragover {
-    background-color: #d8d6db42;
-    border-color: #86838aa9;
-  }
-  .drop-zone p {
-    font-size: 1rem;
-    color: #333;
-  }
-  .drop-zone .browse-button {
-    background-color: #858389;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: bold;
-    margin-top: 15px;
-  }
-  .drop-zone .browse-button:hover {
-    background-color: #c5b4e3;
-  }
-  .buttons-container {
-    text-align: center;
+  
+
+.voter-stats-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
+    align-items: flex-start;
   }
-  button {
-    background-color: #e2e1e4;
-    color: #333;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    display: inline-block;
-    margin: 20px 10px;
-    transition: all 0.3s;
-    font-weight: bold;
-  }
-  button:hover {
-    background-color: #87858aa4;
-    color: white;
-    transform: translateY(-2px);
-  }
-  #fileName {
-    font-size: 1rem;
-    color: #333;
-    margin-top: 20px;
-  }
-  #output,
-  #winnersOverview,
-  #roundResultsContainer {
+  
+
+.center-text {
     margin-top: 50px;
     text-align: center;
   }
   
-  #winnersOverview {
-    margin-bottom: 80px;
-  }
+.left-aligned-list {
+    text-align: left;
+    display: inline-block;
+    margin-top: 30px;
+    margin-bottom: 40px;
+} 
 
-  .position-separator {
-    border-top: 2px solid #ddd;
-    width: 80%;
-    margin: 50px auto;
-  }
-
-  .outer-box {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 50%;
-    margin: 30px auto;
-    text-align: center;
-  }
-  .file-icon-container {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: #d4d3d5ab;
+.ballot-measure-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 2px transparent #fff;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    padding: 30px; 
+    padding-bottom: 100px; 
+    margin-top: 30px; 
   }
-
-  .file-icon {
-    font-size: 3rem;
-    color: #fff;
-  }
-
-  .logo img {
-    max-width: 150px;
-    height: auto;
-  }
-
   
+  .ballot-measure-text {
+    flex: 1;
+    margin-right: 10px; /* Adjust the spacing as needed */
+    margin-left: 60px;
+    text-align: left;
+  }
+  
+  .ballot-measure-chart {
+    flex: 1;
+  }
+  
+  .graph-container {
+    margin-bottom: 20px; /* Space between graphs */
+    width: 300px; /* Adjust width as needed */
+    height: 300px; /* Adjust height as needed */
+  }

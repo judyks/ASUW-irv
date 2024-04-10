@@ -50,6 +50,7 @@ function handleFileSelect(event, fileNameElement, processButton) {
     fileNameElement.innerHTML = "<b>Please select a CSV file</b>";
     return;
   }
+  processButton.disabled = false;
 
   const reader = new FileReader();
   reader.onload = async (event) => {
@@ -59,8 +60,8 @@ function handleFileSelect(event, fileNameElement, processButton) {
     const positions = [...new Set(extractPositionsFromHeaders(globalCsvDataProto.meta.fields))]
                         .filter(isAllowedPosition);
     let positionsInfo = positions.length 
-                        ? `<b>Positions:</b><br> ${positions.join('<br>')}<br>` 
-                        : `<div class='warning'>Warning: No position found in csv, please check your input.</div>`;
+                        ? `<div class="center-text"><b>Positions:</b><br><div class="left-aligned-list">${positions.map(position => `&bull; ${position}`).join('<br>')}<br></div></div>` 
+                        : `<div class='warning center-text'>Warning: No position found in csv, please check your input.</div>`;
 
     const headers = globalCsvDataProto.meta.fields.filter(field => positions.some((position) => field.trim().startsWith(position)));
     const candidates = [...new Set(globalCsvDataProto.data.flatMap((data) => {
@@ -71,7 +72,6 @@ function handleFileSelect(event, fileNameElement, processButton) {
       return candidates;
     }))].filter((candidate) => candidate).sort();
 
-    // Building a table for candidates with checkboxes
     let candidatesInfo = "<b>Candidates:</b>";
     if (candidates.length) {
       candidatesInfo += "<table id='candidatesTable'><tr><th>Select</th><th>Candidate</th></tr>";
@@ -79,20 +79,22 @@ function handleFileSelect(event, fileNameElement, processButton) {
         candidatesInfo += `<tr><td><input type="checkbox" id="candidate-${index}" name="candidate-${index}"></td><td>${candidate}</td></tr>`;
       });
       candidatesInfo += "</table>";
-      candidatesInfo += "<button id='mergeButton'>Merge Selected</button>"; // Merge button
     } else {
       candidatesInfo += `<div class='warning'>Warning: No candidate found in csv, please check your input.</div>`;
     }
 
     document.getElementById('pre-check').innerHTML = [positionsInfo, candidatesInfo].join('<br>');
-    processButton.disabled = false;
 
-    document.getElementById("mergeButton").addEventListener("click", mergeCandidates); // Merge button event listener
+    // Insert the merge button before the process button
+    processButton.parentNode.insertBefore(document.createElement("button"), processButton).outerHTML = "<button id='mergeButton'>Merge Selected</button>";
+    document.getElementById("mergeButton").addEventListener("click", mergeCandidates);
   };
 
   reader.readAsText(file);
   fileNameElement.innerHTML = file ? `<b>${file.name}</b>` : "<b>No file selected</b>";
 }
+
+
 
 function mergeCandidates() {
   const table = document.getElementById('candidatesTable');
@@ -168,12 +170,16 @@ function toggleBallotMeasure() {
   // Ensure content is generated and chart is rendered only when the section is visible
   if (ballotMeasureSection.style.display === "block" && globalCsvDataProto) {
     ballotMeasureSection.innerHTML = `
-      <h1>Ballot Measure</h1>
-      <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
-      <h3>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h3>
-      <p id="ballotMeasureResult"></p>
-      <div style="width:300px; height:300px;">
-        <canvas id="ballotMeasureChart"></canvas>
+      <div class="ballot-measure-container">
+          <div class="ballot-measure-text">
+          <h1>Ballot Measure</h1>
+          <p>Information regarding the Ballot Measure can be found at: <a href="http://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a></p>
+          <h4>Do you approve the 2024 ASUW Proposal Constitution written by the ASUW Constitutional Reform Task Force and presented on <a href="https://vote.asuw.org/initiatives/">vote.asuw.org/initiatives/</a> ?</h4>
+        </div>
+        <div class="ballot-measure-chart" style="width:300px; height:300px;">
+          <canvas id="ballotMeasureChart"></canvas>
+          <h3 id="ballotMeasureResult"></h3>
+        </div>
       </div>
     `;
 
@@ -275,7 +281,7 @@ function processEntry(positions, csvDataProto) {
       + `<div class="position-separator"></div></div>`;
     htmlForPositionByRoundList.forEach((roundResult, roundIndex) => {
       htmlByRound[roundIndex] = htmlByRound[roundIndex] || [];
-      htmlByRound[roundIndex].push(`<h4>Position: ${position}</h4>${roundResult}`);
+      htmlByRound[roundIndex].push(`${roundResult}`);
     });
   }
   let htmlOfRounds = "<h1>Results by Round</h1>";
@@ -307,6 +313,7 @@ function processEntry(positions, csvDataProto) {
 
   setTimeout(() => renderAllCharts(), 10);
 }
+
 
 function updateGlobalCsvDataProtoForMergedCandidates() {
   const mergedCandidatesRow = document.querySelector('#candidatesTable tr:last-child');
@@ -395,15 +402,15 @@ function sortVotes(voteCounts) {
   return Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
 }
 
-
 function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eliminatedThisRound, allEliminatedCandidates) {
-  // Using a sanitized version of the position name to create a valid ID
   const positionId = position.replace(/[^a-zA-Z0-9]/g, "");
   let canvasId = `canvas-chart-position-${positionId}-round-${round}`;
 
-  let outputHtml = `<h3>Round ${round} (${position})</h3><div>`
-    + `<canvas id="${canvasId}" width="400" height="400" position="${positionId}" round="${round}" sortedVotes="${btoa(JSON.stringify(sortedVotes))}"></canvas>`
-    + `</div><table>`;
+  let outputHtml = `<div class="chart-table-container">`;
+  // Including the position name in the table-text-container
+  outputHtml += `<div class="table-text-container">`;
+  outputHtml += `<h3>${position} (Round ${round})</h3>`; // Display the position name
+  outputHtml += `<table>`;
   outputHtml += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
 
   sortedVotes.forEach(([candidate, votes]) => {
@@ -412,12 +419,21 @@ function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eli
   });
 
   outputHtml += `</table>`;
+
   if (eliminatedThisRound.length > 0) {
     outputHtml += `<p><b>Eliminated this round:</b> ${eliminatedThisRound.join(", ")}</p>`;
   }
   if (allEliminatedCandidates.size > 0) {
     outputHtml += `<p><b>Eliminated candidates so far:</b> ${Array.from(allEliminatedCandidates).join(", ")}</p>`;
   }
+
+  outputHtml += `</div>`; // Close table-text-container div
+
+  // Chart container remains the same
+  outputHtml += `<div class="chart-container"><canvas id="${canvasId}" width="400" height="400" position="${positionId}" round="${round}" sortedVotes="${btoa(JSON.stringify(sortedVotes))}"></canvas></div>`;
+
+  outputHtml += `</div>`; // Close chart-table-container div
+
   return outputHtml;
 }
 
@@ -587,16 +603,18 @@ function showVoterStats() {
   voterStatsSection.style.display = "block";
 
   voterStatsSection.innerHTML = `
-    <div>
-      <h2>Living Community Votes</h2>
-      <div style="width:300px; height:300px;">
-      <canvas id="livingCommunityChart"></canvas>
+    <div class="voter-stats-container">
+      <div>
+        <h2>Living Community Votes</h2>
+        <div style="width:300px; height:300px;">
+        <canvas id="livingCommunityChart"></canvas>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Class Standing Votes</h2>
-      <div style="width:300px; height:300px;">
-        <canvas id="classStandingChart"></canvas>
+      <div>
+        <h2>Class Standing Votes</h2>
+        <div style="width:300px; height:300px;">
+          <canvas id="classStandingChart"></canvas>
+        </div>
       </div>
     </div>
   `;
@@ -604,3 +622,4 @@ function showVoterStats() {
   generateLivingCommunityChart();
   generateClassStandingChart();
 }
+
