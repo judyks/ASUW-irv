@@ -37,11 +37,19 @@ th {
     color: white;
 }
 
+h1 {
+    padding: 40px;
+}
+
 h2 {
     text-align: center;
-    font-size: 1.2em;
-    color: #333;
+    font-size: 1.25em;
+    color: #ffffff;
     margin: 20px 0;
+    background-color: #2b2a2a;
+    padding: 10px 70px;
+    display: inline-block;
+    border-radius: 5px;
 }
 
 h3 {
@@ -269,4 +277,3 @@ canvas[id^="canvas-"] {
     width: 300px; /* Adjust width as needed */
     height: 300px; /* Adjust height as needed */
   }
-  

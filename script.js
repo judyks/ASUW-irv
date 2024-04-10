@@ -281,7 +281,7 @@ function processEntry(positions, csvDataProto) {
       + `<div class="position-separator"></div></div>`;
     htmlForPositionByRoundList.forEach((roundResult, roundIndex) => {
       htmlByRound[roundIndex] = htmlByRound[roundIndex] || [];
-      htmlByRound[roundIndex].push(`<h4>Position: ${position}</h4>${roundResult}`);
+      htmlByRound[roundIndex].push(`${roundResult}`);
     });
   }
   let htmlOfRounds = "<h1>Results by Round</h1>";
@@ -313,6 +313,7 @@ function processEntry(positions, csvDataProto) {
 
   setTimeout(() => renderAllCharts(), 10);
 }
+
 
 function updateGlobalCsvDataProtoForMergedCandidates() {
   const mergedCandidatesRow = document.querySelector('#candidatesTable tr:last-child');
@@ -408,7 +409,7 @@ function generatePositionRoundUnit(position, round, sortedVotes, totalVotes, eli
   let outputHtml = `<div class="chart-table-container">`;
   // Including the position name in the table-text-container
   outputHtml += `<div class="table-text-container">`;
-  outputHtml += `<h3>${position}</h3>`; // Display the position name
+  outputHtml += `<h3>${position} (Round ${round})</h3>`; // Display the position name
   outputHtml += `<table>`;
   outputHtml += `<tr><th>Candidate</th><th>Votes</th><th>Percentage</th></tr>`;
 
