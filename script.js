@@ -260,12 +260,13 @@ function setupDropZoneEvents(dropZone, fileInput, fileNameElement) {
 
 
 function extractPositionsFromHeaders(headers) {
-  return headers.map((header) => {
+  var results = headers.map((header) => {
     // Use a regular expression to match either "presidential" or "choice" from headers.
-    const regex = /(presidential|choice|link)/;
+    const regex = /(presidential|choice|Link)/;
     const match = header.split(regex);
     return match && match[0].trim(); // Trim the part before the match.
   });
+  return results;
 }
 
 
