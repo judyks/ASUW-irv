@@ -71,12 +71,22 @@ function handleFileSelect(event, fileNameElement, processButton) {
       }
       return candidates;
     }))].filter((candidate) => candidate).sort();
+    const candidateToPositionMap = {};
+    for(const row of globalCsvDataProto.data){
+      for(const header of headers) {
+        const candidate = row[header]?.trim();
+        const position = extractPositionsFromHeaders([header])[0];
+        candidateToPositionMap[candidate] = candidateToPositionMap[candidate] || new Set();
+        candidateToPositionMap[candidate].add(position);
+      }
+    }
+    
 
     let candidatesInfo = "<b>Candidates:</b>";
     if (candidates.length) {
-      candidatesInfo += "<table id='candidatesTable'><tr><th>Select</th><th>Candidate</th></tr>";
+      candidatesInfo += "<table id='candidatesTable'><tr><th>Select</th><th>Candidate</th><th>Positions</th></tr>";
       candidates.forEach((candidate, index) => {
-        candidatesInfo += `<tr><td><input type="checkbox" id="candidate-${index}" name="candidate-${index}"></td><td>${candidate}</td></tr>`;
+        candidatesInfo += `<tr><td><input type="checkbox" id="candidate-${index}" name="candidate-${index}"></td><td>${candidate}</td><td>${Array.from(candidateToPositionMap[candidate]).sort().join(', ')}</td></tr>`;
       });
       candidatesInfo += "</table>";
     } else {
